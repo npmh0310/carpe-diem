@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader } from "./components/Loader";
 import { Logo } from "@/components/common/Logo";
 import { SocialLinks } from "./components/SocialLinks";
+import { HorizontalGallery } from "./components/HorizontalGallery";
 import { MaskText } from "@/components/common/MaskText";
 import Link from "next/link";
 
@@ -15,30 +16,36 @@ export default function Home() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col justify-between p-4 sm:p-8 overflow-hidden">
+    <main className="relative min-h-screen flex flex-col justify-between">
       {/* Top Row */}
-      <header className="flex justify-between items-center w-full z-10">
-        <Logo className="text-3xl" />
-        <Link
-          href="/about"
-          className="uppercase text-xs  tracking-widest hover:opacity-60 transition-opacity"
-        >
-          <MaskText>About</MaskText>
-        </Link>
+      <header className="fixed top-0 left-0 w-full z-20 flex justify-between items-center p-4 sm:p-8 pointer-events-none mix-blend-difference text-white">
+        <div className="pointer-events-auto">
+          <Logo className="text-3xl" />
+        </div>
+        <div className="pointer-events-auto">
+          <Link
+            href="/about"
+            className="uppercase text-xs tracking-widest hover:opacity-60 transition-opacity"
+          >
+            <MaskText>About</MaskText>
+          </Link>
+        </div>
       </header>
 
-      {/* Center Content Placeholder */}
-      <div className="flex-1 flex items-center justify-center">
-        {/* Main content can go here in the future */}
+      {/* Horizontal Scroll Gallery */}
+      <div className="flex-1 w-full">
+        <HorizontalGallery />
       </div>
 
       {/* Bottom Row */}
-      <footer className="flex justify-between items-end w-full z-10">
+      <footer className="fixed bottom-0 left-0 w-full z-20 flex justify-between items-end p-4 sm:p-8 pointer-events-none mix-blend-difference text-white">
         {/* Bottom Left - Empty for now */}
         <div className="w-1/3"></div>
 
         {/* Bottom Right - Socials */}
-        <SocialLinks />
+        <div className="pointer-events-auto">
+          <SocialLinks />
+        </div>
       </footer>
     </main>
   );
