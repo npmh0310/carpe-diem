@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useScroll, useSpring } from "framer-motion";
 import { Loader } from "./components/Loader";
 import { Logo } from "@/components/common/Logo";
 import { SocialLinks } from "./components/SocialLinks";
 import { HorizontalGallery } from "./components/HorizontalGallery";
+import { HeaderProjectTrack } from "./components/HeaderProjectTrack";
 import { MaskText } from "@/components/common/MaskText";
 import Link from "next/link";
 
@@ -15,13 +17,35 @@ export default function Home() {
     return <Loader onComplete={() => setIsLoading(false)} />;
   }
 
+  return <HomeContent />;
+}
+
+function HomeContent() {
+  // Scroll progress của HorizontalGallery (dùng chung cho header + gallery)
+  const galleryRef = useRef<HTMLDivElement | null>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: galleryRef,
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    mass: 0.1,
+    stiffness: 100,
+    damping: 20,
+    restDelta: 0.001,
+  });
+
   return (
     <main className="relative min-h-screen flex flex-col justify-between">
       {/* Top Row */}
-      <header className="fixed top-0 left-0 w-full z-20 flex justify-between items-center p-4 sm:p-8 pointer-events-none mix-blend-difference text-white">
+      <header className="fixed top-0 left-0 w-full z-20 flex items-center justify-between p-4 sm:p-8 pointer-events-none mix-blend-difference text-white">
         <div className="pointer-events-auto">
           <Logo className="text-3xl" />
         </div>
+
+        {/* Center progress bar: dãy cột ||||, project nào "lên đầu" thì cột tương ứng cao hơn */}
+        <HeaderProjectTrack progress={smoothProgress} />
+
         <div className="pointer-events-auto">
           <Link
             href="/about"
@@ -34,7 +58,7 @@ export default function Home() {
 
       {/* Horizontal Scroll Gallery */}
       <div className="flex-1 w-full">
-        <HorizontalGallery />
+        <HorizontalGallery targetRef={galleryRef} progress={smoothProgress} />
       </div>
 
       {/* Bottom Row */}
