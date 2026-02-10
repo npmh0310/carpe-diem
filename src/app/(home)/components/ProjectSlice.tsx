@@ -3,24 +3,18 @@
 import { motion, MotionValue, useSpring, useTransform, useVelocity } from 'framer-motion';
 import Image from 'next/image';
 import { MaskText } from '@/components/common/MaskText';
+import type { Project } from '@/data/projects';
 
 interface ProjectSliceProps {
-  src: string;
-  title: string;
-  category: string;
+  project: Project;
   index: number;
   total: number;
   progress: MotionValue<number>;
+  onOpen?: (project: Project, index: number) => void;
 }
 
-export const ProjectSlice = ({
-  src,
-  title,
-  category,
-  index,
-  total,
-  progress,
-}: ProjectSliceProps) => {
+export const ProjectSlice = ({ project, index, total, progress, onOpen }: ProjectSliceProps) => {
+  const { src, title, category, location, shotDate, filmStock } = project;
   // Parallax effect: map global progress to local image movement
   const parallaxX = useTransform(progress, [0, 1], ['0%', '-20%']);
 
@@ -77,10 +71,22 @@ export const ProjectSlice = ({
     return `grayscale(${grayscale}) brightness(${brightness}) saturate(${saturate})`;
   });
 
+  // Year để hiển thị gọn trong overlay
+  const shotYear = new Date(shotDate).getFullYear();
+
   return (
     <motion.div
       style={{ scale, opacity, y }}
-      className="relative h-[45vh] w-[14vh] md:w-[18vh] min-w-[100px] shrink-0 overflow-hidden shadow-[0_10px_40px_-18px_rgba(0,0,0,0.6)] will-change-transform"
+      className="relative h-[45vh] w-[14vh] md:w-[18vh] min-w-[100px] shrink-0 overflow-hidden shadow-[0_10px_40px_-18px_rgba(0,0,0,0.6)] will-change-transform cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen?.(project, index)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpen?.(project, index);
+        }
+      }}
     >
       {/* Image Container with Parallax */}
       <div className="absolute inset-0 overflow-hidden">
@@ -105,11 +111,14 @@ export const ProjectSlice = ({
 
       {/* Content Overlay */}
       <div className="absolute bottom-4 left-4 z-10 text-white mix-blend-difference">
-        <div className="text-xs uppercase tracking-widest opacity-80 mb-1">
-          {category}
+        <div className="text-[10px] uppercase tracking-[0.22em] opacity-80 mb-1">
+          {location} · {shotYear}
         </div>
         <div className="text-2xl font-light uppercase tracking-tight">
           <MaskText>{title}</MaskText>
+        </div>
+        <div className="mt-1 text-[10px] uppercase tracking-[0.18em] opacity-80">
+          {filmStock}
         </div>
       </div>
     </motion.div>

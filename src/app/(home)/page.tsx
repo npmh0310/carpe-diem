@@ -9,6 +9,7 @@ import { HorizontalGallery } from "./components/HorizontalGallery";
 import { HeaderProjectTrack } from "./components/HeaderProjectTrack";
 import { MaskText } from "@/components/common/MaskText";
 import Link from "next/link";
+import { ProjectLightbox, type LightboxProject } from "./components/ProjectLightbox";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +24,7 @@ export default function Home() {
 function HomeContent() {
   // Scroll progress của HorizontalGallery (dùng chung cho header + gallery)
   const galleryRef = useRef<HTMLDivElement | null>(null);
+  const [activeProject, setActiveProject] = useState<LightboxProject | null>(null);
 
   const { scrollYProgress } = useScroll({
     target: galleryRef,
@@ -43,9 +45,6 @@ function HomeContent() {
           <Logo className="text-3xl" />
         </div>
 
-        {/* Center progress bar: dãy cột ||||, project nào "lên đầu" thì cột tương ứng cao hơn */}
-        <HeaderProjectTrack progress={smoothProgress} />
-
         <div className="pointer-events-auto">
           <Link
             href="/about"
@@ -54,11 +53,21 @@ function HomeContent() {
             <MaskText>About</MaskText>
           </Link>
         </div>
+
+        {/* Center progress bar: luôn giữa viewport, độc lập 2 bên */}
+        <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+          <HeaderProjectTrack progress={smoothProgress} />
+        </div>
       </header>
 
       {/* Horizontal Scroll Gallery */}
       <div className="flex-1 w-full">
-        <HorizontalGallery targetRef={galleryRef} progress={smoothProgress} />
+        <HorizontalGallery
+          targetRef={galleryRef}
+          progress={smoothProgress}
+          activeIndex={activeProject?.index ?? null}
+          onOpenProject={setActiveProject}
+        />
       </div>
 
       {/* Bottom Row */}
@@ -71,6 +80,9 @@ function HomeContent() {
           <SocialLinks />
         </div>
       </footer>
+
+      {/* Full image overlay */}
+      <ProjectLightbox project={activeProject} onClose={() => setActiveProject(null)} />
     </main>
   );
 }
