@@ -38,10 +38,21 @@ export const HorizontalGallery = ({
               const isActive = activeIndex === index;
               const hasActive = activeIndex != null;
 
-              const direction = !hasActive ? 0 : index < (activeIndex as number) ? -1 : index > (activeIndex as number) ? 1 : 0;
+              const direction = !hasActive
+                ? 0
+                : index < (activeIndex as number)
+                  ? -1
+                  : index > (activeIndex as number)
+                    ? 1
+                    : 0;
+
               const distance = !hasActive ? 0 : Math.abs(index - (activeIndex as number));
-              const shift =
-                direction === 0 ? "0vw" : `${direction * (18 + distance * 4)}vw`;
+              const shift = direction === 0 ? "0vw" : `${direction * (18 + distance * 4)}vw`;
+
+              // Khi chưa có active (vừa vào page): slide từng card từ phải (20vw) vào, mờ -> rõ, blur -> sharp
+              const initial = !hasActive
+                ? { x: "20vw", opacity: 0, filter: "blur(16px)" }
+                : undefined;
 
               const animate = !hasActive
                 ? { x: "0vw", opacity: 1, filter: "blur(0px)" }
@@ -49,13 +60,18 @@ export const HorizontalGallery = ({
                   ? { x: "0vw", opacity: 0, filter: "blur(6px)" }
                   : { x: shift, opacity: 0, filter: "blur(10px)" };
 
-              const delay = !hasActive ? 0 : Math.min(0.22, distance * 0.03);
+              const delay = !hasActive
+                ? index * 0.12 // stagger từng card khi vào
+                : Math.min(0.35, distance * 0.05);
+
+              const duration = !hasActive ? 1.6 : 1.1;
 
               return (
                 <motion.div
                   key={index}
+                  initial={initial}
                   animate={animate}
-                  transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1], delay }}
+                  transition={{ duration, ease: [0.22, 1, 0.36, 1], delay }}
                   style={{ willChange: "transform, opacity, filter" }}
                   className="shrink-0"
                 >
