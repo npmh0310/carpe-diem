@@ -3,7 +3,7 @@ import { Anton, Oswald } from "next/font/google"; // Anton as Druk alternative, 
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
-
+import { InitialLoaderProvider } from "@/components/providers/initial-loader-provider";
 import { ModeToggle } from "@/components/common/ModeToggle";
 
 const anton = Anton({
@@ -38,10 +38,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
-            <div className="fixed left-4 bottom-4 z-50">
-              <ModeToggle />
-            </div>
+            <InitialLoaderProvider>
+              {children}
+              <div className="fixed left-4 bottom-4 z-50">
+                <ModeToggle />
+              </div>
+            </InitialLoaderProvider>
           </ThemeProvider>
         </SmoothScrollProvider>
       </body>

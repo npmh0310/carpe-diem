@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { Project } from "@/data/projects";
 
 export type LightboxProject = Project & { index: number };
@@ -15,6 +16,8 @@ interface ProjectLightboxProps {
 }
 
 export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLightboxProps) {
+  const router = useRouter();
+
   useEffect(() => {
     if (!project) return;
 
@@ -160,14 +163,23 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   </div>
                   <motion.button
                     type="button"
-                    className="mt-2 inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] sm:text-[11px] uppercase tracking-[0.26em] hover:opacity-70 transition-opacity"
-                    onClick={() => onNext?.()}
+                    className="mt-2 cursor-pointer inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] sm:text-[11px] uppercase tracking-[0.26em]"
+                    onClick={() => router.push(`/${project.slug}`)}
                     initial={{ y: 8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
+                    whileHover={{ x: 4, opacity: 0.8 }}
+                    whileTap={{ scale: 0.96 }}
                     transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.34 }}
                   >
                     <span>View detail album</span>
-                    <span className="text-base leading-none">+</span>
+                    <motion.span
+                      className="text-base leading-none"
+                      initial={{ rotate: 0 }}
+                      whileHover={{ rotate: 90 }}
+                      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                    >
+                      +
+                    </motion.span>
                   </motion.button>
                 </motion.div>
               </div>

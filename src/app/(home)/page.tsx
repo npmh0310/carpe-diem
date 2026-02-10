@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useScroll, useSpring } from "framer-motion";
-import { Loader } from "./components/Loader";
 import { Logo } from "@/components/common/Logo";
 import { SocialLinks } from "./components/SocialLinks";
 import { HorizontalGallery } from "./components/HorizontalGallery";
@@ -13,12 +12,6 @@ import { ProjectLightbox, type LightboxProject } from "./components/ProjectLight
 import { PROJECTS } from "@/data/projects";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  if (isLoading) {
-    return <Loader onComplete={() => setIsLoading(false)} />;
-  }
-
   return <HomeContent />;
 }
 
@@ -39,7 +32,7 @@ function HomeContent() {
   });
 
   const handleNextProject = () => {
-    setActiveProject((current) => {
+    setActiveProject((current: LightboxProject | null) => {
       if (!current) return current;
 
       const currentIndex = current.index;
@@ -51,7 +44,7 @@ function HomeContent() {
   };
 
   const handlePrevProject = () => {
-    setActiveProject((current) => {
+    setActiveProject((current: LightboxProject | null) => {
       if (!current) return current;
 
       const currentIndex = current.index;

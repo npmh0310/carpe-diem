@@ -4,11 +4,11 @@ import { useEffect, useRef } from "react";
 import { animate } from "framer-motion";
 import { useTheme } from "next-themes";
 
-interface LoaderProps {
+interface GlobalLoadingProps {
   onComplete?: () => void;
 }
 
-export const Loader = ({ onComplete }: LoaderProps) => {
+export const GlobalLoading = ({ onComplete }: GlobalLoadingProps) => {
   const countRef = useRef<HTMLDivElement>(null);
 
   const { theme } = useTheme();
@@ -65,3 +65,4 @@ export const Loader = ({ onComplete }: LoaderProps) => {
     </div>
   );
 };
+
