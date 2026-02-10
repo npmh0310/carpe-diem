@@ -1,9 +1,9 @@
 'use client';
 
-import { motion, MotionValue, useSpring, useTransform, useVelocity } from 'framer-motion';
-import Image from 'next/image';
-import { MaskText } from '@/components/common/MaskText';
-import type { Project } from '@/data/projects';
+import { motion, MotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
+import Image from "next/image";
+import { MaskText } from "@/components/common/MaskText";
+import type { Project } from "@/data/projects";
 
 interface ProjectSliceProps {
   project: Project;
@@ -14,9 +14,9 @@ interface ProjectSliceProps {
 }
 
 export const ProjectSlice = ({ project, index, total, progress, onOpen }: ProjectSliceProps) => {
-  const { src, title, category, location, shotDate, filmStock } = project;
+  const { src, title, location, startDate, endDate, filmName } = project;
   // Parallax effect: map global progress to local image movement
-  const parallaxX = useTransform(progress, [0, 1], ['0%', '-20%']);
+  const parallaxX = useTransform(progress, [0, 1], ["0%", "-20%"]);
 
   // "Center focus" effect: card gần điểm focus được nhấn mạnh hơn.
   const focusPoint = total > 1 ? index / (total - 1) : 0;
@@ -72,7 +72,9 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
   });
 
   // Year để hiển thị gọn trong overlay
-  const shotYear = new Date(shotDate).getFullYear();
+  const startYear = new Date(startDate).getFullYear();
+  const endYear = new Date(endDate).getFullYear();
+  const yearLabel = startYear === endYear ? startYear : `${startYear}–${endYear}`;
 
   return (
     <motion.div
@@ -82,7 +84,7 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
       tabIndex={0}
       onClick={() => onOpen?.(project, index)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           onOpen?.(project, index);
         }
@@ -93,7 +95,7 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
         <motion.div
           className="relative w-[140%] h-full"
           style={{ x: parallaxX, filter: colorFilter }}
-          whileHover={{ filter: 'grayscale(0) brightness(1.1) saturate(1.5)' }}
+          whileHover={{ filter: "grayscale(0) brightness(1.1) saturate(1.5)" }}
           transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
         >
           <Image
@@ -112,13 +114,13 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
       {/* Content Overlay */}
       <div className="absolute bottom-4 left-4 z-10 text-white mix-blend-difference">
         <div className="text-[10px] uppercase tracking-[0.22em] opacity-80 mb-1">
-          {location} · {shotYear}
+          {location} · {yearLabel}
         </div>
         <div className="text-2xl font-light uppercase tracking-tight">
           <MaskText>{title}</MaskText>
         </div>
         <div className="mt-1 text-[10px] uppercase tracking-[0.18em] opacity-80">
-          {filmStock}
+          {filmName}
         </div>
       </div>
     </motion.div>

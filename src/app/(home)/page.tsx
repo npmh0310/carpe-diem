@@ -10,6 +10,7 @@ import { HeaderProjectTrack } from "./components/HeaderProjectTrack";
 import { MaskText } from "@/components/common/MaskText";
 import Link from "next/link";
 import { ProjectLightbox, type LightboxProject } from "./components/ProjectLightbox";
+import { PROJECTS } from "@/data/projects";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +37,30 @@ function HomeContent() {
     damping: 20,
     restDelta: 0.001,
   });
+
+  const handleNextProject = () => {
+    setActiveProject((current) => {
+      if (!current) return current;
+
+      const currentIndex = current.index;
+      const nextIndex = (currentIndex + 1) % PROJECTS.length;
+      const nextProject = PROJECTS[nextIndex];
+
+      return { ...nextProject, index: nextIndex };
+    });
+  };
+
+  const handlePrevProject = () => {
+    setActiveProject((current) => {
+      if (!current) return current;
+
+      const currentIndex = current.index;
+      const prevIndex = (currentIndex - 1 + PROJECTS.length) % PROJECTS.length;
+      const prevProject = PROJECTS[prevIndex];
+
+      return { ...prevProject, index: prevIndex };
+    });
+  };
 
   return (
     <main className="relative min-h-screen flex flex-col justify-between">
@@ -82,7 +107,12 @@ function HomeContent() {
       </footer>
 
       {/* Full image overlay */}
-      <ProjectLightbox project={activeProject} onClose={() => setActiveProject(null)} />
+      <ProjectLightbox
+        project={activeProject}
+        onClose={() => setActiveProject(null)}
+        onNext={handleNextProject}
+        onPrev={handlePrevProject}
+      />
     </main>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anton } from "next/font/google"; // Import Anton as Druk alternative
+import { Anton, Oswald } from "next/font/google"; // Anton as Druk alternative, Oswald for captions
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
@@ -10,6 +10,12 @@ const anton = Anton({
   variable: "--font-anton",
   subsets: ["latin"],
   weight: "400", // Anton only has 400, but it looks like 900
+});
+
+const oswald = Oswald({
+  variable: "--font-oswald",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${anton.variable} antialiased`}>
+      <body className={`${anton.variable} ${oswald.variable} antialiased`}>
         <SmoothScrollProvider>
           <ThemeProvider
             attribute="class"

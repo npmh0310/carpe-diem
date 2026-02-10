@@ -10,26 +10,46 @@ export type LightboxProject = Project & { index: number };
 interface ProjectLightboxProps {
   project: LightboxProject | null;
   onClose: () => void;
+  onNext?: () => void;
+  onPrev?: () => void;
 }
 
-export function ProjectLightbox({ project, onClose }: ProjectLightboxProps) {
+export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLightboxProps) {
   useEffect(() => {
     if (!project) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") {
+        onNext?.();
+      }
+      if (e.key === "ArrowLeft") {
+        onPrev?.();
+      }
+    };
+
+    const onWheel = () => {
+      onClose();
+    };
+
+    const onTouchMove = () => {
+      onClose();
     };
 
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("wheel", onWheel);
+    window.addEventListener("touchmove", onTouchMove);
 
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+       window.removeEventListener("wheel", onWheel);
+       window.removeEventListener("touchmove", onTouchMove);
       document.body.style.overflow = prevOverflow;
     };
-  }, [project, onClose]);
+  }, [project, onClose, onNext, onPrev]);
 
   return (
     <AnimatePresence>
@@ -52,74 +72,104 @@ export function ProjectLightbox({ project, onClose }: ProjectLightboxProps) {
           {/* Panel */}
           <div className="relative z-10 flex h-full w-full items-center justify-center px-4 sm:px-10">
             {/* Ảnh ở đúng trung tâm màn hình */}
-            <motion.div
-              className="relative w-full max-w-3xl flex items-center justify-center"
-              initial={{ opacity: 0, y: 18, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 14, scale: 0.98 }}
-              transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="relative w-full aspect-video overflow-hidden">
-                <Image src={project.src} alt={project.title} fill className="object-cover" sizes="100vw" priority />
-              </div>
-            </motion.div>
+            <div className="relative w-full max-w-3xl flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={project.slug}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-full aspect-video overflow-hidden"
+                >
+                  <Image
+                    src={project.src}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
             {/* Nội dung absolute dưới đáy, giống footer, cùng bề rộng với ảnh */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-4 sm:bottom-6 flex justify-center">
-              <div className="pointer-events-auto w-full max-w-3xl flex flex-col sm:flex-row justify-between gap-6 text-[11px] sm:text-xs">
-                {/* Giới thiệu sơ project */}
-                <div className="flex-1 space-y-2">
-                  <div className="uppercase text-[10px] tracking-[0.25em] opacity-70">
+            <div className="pointer-events-none absolute inset-x-0 bottom-6 sm:bottom-10 flex justify-center">
+              <div className="pointer-events-auto w-full max-w-3xl flex items-start justify-between gap-8 text-[10px] sm:text-[11px] font-oswald tracking-[0.2em]">
+                {/* Cột meta bên trái với A/B/C/D – map thẳng từ data */}
+                <motion.div
+                  className="flex flex-col gap-1 text-[9px] sm:text-[10px] uppercase"
+                  initial={{ x: -24, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+                >
+                  <div className="flex items-baseline gap-3 sm:gap-4">
+                    <span className="opacity-60">A</span>
+                    <span className="opacity-60">Dates</span>
+                    <span className="opacity-90">
+                      {new Date(project.startDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })}
+                      {" – "}
+                      {new Date(project.endDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-3 sm:gap-4">
+                    <span className="opacity-60">B</span>
+                    <span className="opacity-60">Camera</span>
+                    <span className="opacity-90">{project.camera}</span>
+                  </div>
+                  <div className="flex items-baseline gap-3 sm:gap-4">
+                    <span className="opacity-60">C</span>
+                    <span className="opacity-60">Film</span>
+                    <span className="opacity-90">
+                      {project.filmName}
+                      {project.framesCount ? ` · ${project.framesCount} frames` : ""}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-3 sm:gap-4">
+                    <span className="opacity-60">D</span>
+                    <span className="opacity-60">Lab</span>
+                    <span className="opacity-90">{project.lab}</span>
+                  </div>
+                </motion.div>
+
+                {/* Cột phải: title + mô tả + nút view detail */}
+                <motion.div
+                  className="flex-1 flex flex-col items-end gap-2 text-right text-[9px] sm:text-[10px]"
+                  initial={{ x: 24, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.26 }}
+                >
+                  <div className="uppercase opacity-70 tracking-[0.22em]">
                     {project.location}
                   </div>
-                  <h2 className="text-base sm:text-lg md:text-xl font-light tracking-[0.18em] uppercase">
+                  {/* <h2 className="text-base sm:text-lg md:text-xl font-light tracking-[0.18em] uppercase">
                     {project.title}
-                  </h2>
-                  <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] opacity-70">
-                    {project.filmStock} · {project.camera}
-                  </div>
-                  <p className="max-w-md text-[11px] sm:text-xs text-muted-foreground/80 leading-relaxed">
-                    {project.shortDescription}
+                  </h2> */}
+                  <p className="max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90">
+                    {project.description}
                   </p>
-                </div>
-
-                {/* Meta + action */}
-                <div className="flex flex-col items-start sm:items-end gap-3 text-[10px] sm:text-[11px]">
-                  <div className="space-y-1 tracking-[0.16em] uppercase text-foreground/70">
-                    <div className="flex gap-3 sm:gap-6">
-                      <span className="opacity-60">A</span>
-                      <span className="opacity-60">Film</span>
-                      <span className="opacity-90">
-                        {project.filmStock}
-                      </span>
-                    </div>
-                    <div className="flex gap-3 sm:gap-6">
-                      <span className="opacity-60">B</span>
-                      <span className="opacity-60">Date</span>
-                      <span className="opacity-90">
-                        {new Date(project.shotDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex gap-3 sm:gap-6">
-                      <span className="opacity-60">C</span>
-                      <span className="opacity-60">Location</span>
-                      <span className="opacity-90">
-                        {project.location}
-                      </span>
-                    </div>
+                  <div className="mt-1 text-[8px] sm:text-[9px] uppercase tracking-[0.22em] opacity-60">
+                    Photographer · {project.photographer}
                   </div>
-
-                  <button
+                  <motion.button
                     type="button"
-                    className="inline-flex items-center gap-3 border-t border-foreground/25 pt-3 text-[11px] sm:text-xs uppercase tracking-[0.22em] hover:opacity-70 transition-opacity"
+                    className="mt-2 inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] sm:text-[11px] uppercase tracking-[0.26em] hover:opacity-70 transition-opacity"
+                    onClick={() => onNext?.()}
+                    initial={{ y: 8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.34 }}
                   >
-                    <span>View full image series</span>
-                    <span className="text-lg leading-none">+</span>
-                  </button>
-                </div>
+                    <span>View detail album</span>
+                    <span className="text-base leading-none">+</span>
+                  </motion.button>
+                </motion.div>
               </div>
             </div>
           </div>
