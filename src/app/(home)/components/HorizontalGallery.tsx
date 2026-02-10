@@ -1,28 +1,16 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { PROJECTS } from "@/data/projects";
 import { ProjectSlice } from "./ProjectSlice";
 
 export const HorizontalGallery = () => {
   const targetRef = useRef<HTMLDivElement>(null);
+
   const { scrollYProgress } = useScroll({
     target: targetRef,
   });
-
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      // If horizontal scroll is dominant
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        e.preventDefault();
-        window.scrollBy(0, e.deltaX);
-      }
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, []);
 
   // Add smooth physics to the scroll progress
   const smoothProgress = useSpring(scrollYProgress, {
@@ -34,6 +22,8 @@ export const HorizontalGallery = () => {
 
   // Map vertical scroll (0 to 1) to horizontal translation
   const x = useTransform(smoothProgress, [0, 1], ["0%", "-75%"]);
+
+  const totalItems = PROJECTS.length * 2;
 
   return (
     <div ref={targetRef} className="relative h-[300vh] bg-background">
@@ -47,6 +37,7 @@ export const HorizontalGallery = () => {
               key={index}
               {...project}
               index={index}
+              total={totalItems}
               progress={smoothProgress}
             />
           ))}
@@ -55,7 +46,8 @@ export const HorizontalGallery = () => {
             <ProjectSlice
               key={`duplicate-${index}`}
               {...project}
-              index={index}
+              index={index + PROJECTS.length}
+              total={totalItems}
               progress={smoothProgress}
             />
           ))}

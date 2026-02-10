@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anton } from "next/font/google"; // Import Anton as Druk alternative
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 
 import { ModeToggle } from "@/components/common/ModeToggle";
 
@@ -24,17 +25,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${anton.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <div className="fixed left-4 bottom-4 z-50">
-            <ModeToggle />
-          </div>
-        </ThemeProvider>
+        <SmoothScrollProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <div className="fixed left-4 bottom-4 z-50">
+              <ModeToggle />
+            </div>
+          </ThemeProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );
