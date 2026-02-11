@@ -48,8 +48,8 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-       window.removeEventListener("wheel", onWheel);
-       window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
       document.body.style.overflow = prevOverflow;
     };
   }, [project, onClose, onNext, onPrev]);
@@ -62,27 +62,29 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.75, ease: [0.32, 0.72, 0, 1] }}
         >
-          {/* Backdrop - trong suốt, chỉ dùng để detect click đóng */}
-          <motion.button
-            type="button"
-            aria-label="Close image preview"
-            className="absolute inset-0 bg-transparent"
+          {/* Panel – slide up from bottom */}
+          <motion.div
+            className="relative z-10 flex h-full w-full items-center justify-center px-4 sm:px-10"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
             onClick={onClose}
-          />
-
-          {/* Panel */}
-          <div className="relative z-10 flex h-full w-full items-center justify-center px-4 sm:px-10">
+          >
             {/* Ảnh ở đúng trung tâm màn hình */}
-            <div className="relative w-full max-w-3xl flex items-center justify-center">
+            <div
+              className="relative w-full max-w-3xl flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={project.slug}
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.18 }}
                   className="relative w-full aspect-video overflow-hidden"
                 >
                   <Image
@@ -103,9 +105,9 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                 {/* Cột meta bên trái với A/B/C/D – map thẳng từ data */}
                 <motion.div
                   className="flex flex-col gap-1 text-[9px] sm:text-[10px] uppercase"
-                  initial={{ x: -24, opacity: 0 }}
+                  initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.18 }}
+                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.42 }}
                 >
                   <div className="flex items-baseline gap-3 sm:gap-4">
                     <span className="opacity-60">A</span>
@@ -145,9 +147,10 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                 {/* Cột phải: title + mô tả + nút view detail */}
                 <motion.div
                   className="flex-1 flex flex-col items-end gap-2 text-right text-[9px] sm:text-[10px]"
-                  initial={{ x: 24, opacity: 0 }}
+                  initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.26 }}
+                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.52 }}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="uppercase opacity-70 tracking-[0.22em]">
                     {project.location}
@@ -165,11 +168,11 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                     type="button"
                     className="mt-2 cursor-pointer inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] sm:text-[11px] uppercase tracking-[0.26em]"
                     onClick={() => router.push(`/${project.slug}`)}
-                    initial={{ y: 8, opacity: 0 }}
+                    initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     whileHover={{ x: 4, opacity: 0.8 }}
                     whileTap={{ scale: 0.96 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.34 }}
+                    transition={{ duration: 0.65, ease: [0.32, 0.72, 0, 1], delay: 0.65 }}
                   >
                     <span>View detail album</span>
                     <motion.span
@@ -184,7 +187,7 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                 </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       ) : null}
     </AnimatePresence>

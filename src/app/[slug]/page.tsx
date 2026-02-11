@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Fragment } from "react";
 import { PROJECTS } from "@/data/projects";
 import { Logo } from "@/components/common/Logo";
 import { MaskText } from "@/components/common/MaskText";
+import { ImageGallery } from "./components/ImageGallery";
+import { PageEnter } from "./components/PageEnter";
 
 type ProjectSlugPageProps = {
   params: Promise<{
@@ -33,6 +36,13 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
     );
   }
 
+  const paragraphs = project.description
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const hasMultipleParagraphs = paragraphs.length > 1;
+  const descriptionBlocks = hasMultipleParagraphs ? paragraphs : [project.description];
+
   const startLabel = new Date(project.startDate).toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
@@ -41,56 +51,106 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
     month: "short",
     year: "numeric",
   });
-  const dateLabel =
+  const dateRange =
     startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
+  const filmLabel = project.framesCount
+    ? `${project.filmName} · ${project.framesCount} frames`
+    : project.filmName;
+
+  const leftMeta = [
+    { label: "Camera", value: project.camera },
+    { label: "Film", value: filmLabel },
+    { label: "Lab", value: project.lab },
+  ];
+
+  const rightMeta = [
+    { label: "Location", value: project.location },
+    { label: "Dates", value: dateRange },
+    { label: "Photographer", value: project.photographer },
+  ];
 
   return (
-    <main className="min-h-screen flex flex-col bg-background text-foreground">
+    <main className="min-h-screen flex flex-col text-foreground  ">
       {/* Top bar */}
       <header className="flex items-center justify-between px-4 sm:px-8 pt-4 sm:pt-8 pb-6 sm:pb-10">
         <Link href="/" className="pointer-events-auto">
           <Logo className="text-3xl" />
         </Link>
-
         <div className="flex items-center gap-6 text-[10px] sm:text-xs font-oswald uppercase tracking-[0.28em]">
-          <Link
-            href="/"
-            className="hover:opacity-70 transition-opacity"
-          >
+          <Link href="/" className="hover:opacity-70 transition-opacity">
             <MaskText>Back to gallery</MaskText>
           </Link>
         </div>
       </header>
 
-      {/* Hero + meta */}
-      <section className="flex-1 px-4 sm:px-8 pb-10 sm:pb-16">
-        <div className="mx-auto max-w-5xl grid gap-10 sm:gap-14 md:grid-cols-[minmax(0,3fr)_minmax(0,2.5fr)] items-start">
-          {/* Image */}
-          <div className="relative w-full aspect-4/3 md:aspect-5/4 overflow-hidden ">
-            <Image
-              src={project.src}
-              alt={project.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 60vw"
-              priority
-            />
-          </div>
+      <PageEnter>
+        {/* Nội dung album: title + description nhỏ + meta 2 cột – nền sáng */}
+        <section className="flex-1 px-4 sm:px-8 py-12 sm:py-16 md:py-20">
+          <div className="mx-auto max-w-4xl">
+            <h1 className="text-center text-3xl sm:text-4xl md:text-5xl font-semibold uppercase tracking-[0.12em] text-foreground">
+              {project.title}
+            </h1>
 
-          {/* Details */}
-          <div className="flex flex-col gap-6 md:gap-8 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.22em]">
-            <div className="mt-4 flex flex-wrap gap-4 text-[9px] sm:text-[10px] tracking-[0.24em]">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 border-b border-current pb-0.5 hover:opacity-70 transition-opacity"
-              >
-                <span>Back to all projects</span>
-                <span className="text-base leading-none">↲</span>
-              </Link>
+            {/* Description nhỏ dưới title – cùng font với meta (Oswald) */}
+            <div className="mt-6 sm:mt-8 text-center font-oswald text-[11px] sm:text-[12px] leading-relaxed text-foreground/80 max-w-2xl mx-auto normal-case tracking-[0.16em]">
+              {descriptionBlocks.map((block, i) => (
+                <p key={i} className={i > 0 ? "mt-4" : ""}>
+                  {block}
+                </p>
+              ))}
+            </div>
+
+            {/* Meta 2 cột: trái (máy/film/lab), phải (địa điểm/người chụp) */}
+            <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0">
+              {/* Cột trái: Dates, Camera, Film, Lab */}
+              <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
+                {leftMeta.map(({ label, value }) => (
+                  <Fragment key={label}>
+                    <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">
+                      {label}
+                    </dt>
+                    <dd className="pt-3 border-b border-foreground/10 pb-2 text-foreground/90">
+                      {value}
+                    </dd>
+                  </Fragment>
+                ))}
+              </dl>
+
+              {/* Cột phải: Location, Photographer */}
+              <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em] md:mt-0 mt-6">
+                {rightMeta.map(({ label, value }) => (
+                  <Fragment key={label}>
+                    <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">
+                      {label}
+                    </dt>
+                    <dd className="pt-3 border-b border-foreground/10 pb-2 text-foreground/90">
+                      {value}
+                    </dd>
+                  </Fragment>
+                ))}
+              </dl>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* Gallery: ảnh phía dưới */}
+        {project.images && project.images.length > 0 ? (
+          <ImageGallery images={project.images} alt={project.title} />
+        ) : (
+          <section className="bg-black">
+            <div className="relative w-full aspect-4/3 sm:aspect-video overflow-hidden">
+              <Image
+                src={project.src}
+                alt={project.title}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority
+              />
+            </div>
+          </section>
+        )}
+      </PageEnter>
     </main>
   );
 }
