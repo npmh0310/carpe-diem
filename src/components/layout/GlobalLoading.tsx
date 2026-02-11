@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { animate } from "framer-motion";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 
 interface GlobalLoadingProps {
   onComplete?: () => void;
@@ -59,6 +60,13 @@ export const GlobalLoading = ({ onComplete }: GlobalLoadingProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+      <Image
+        src="/logo.svg"
+        alt="logo"
+        width={40}
+        height={40}
+        className="absolute top-10 left-1/2 -translate-x-1/2 invert dark:invert-0"
+      />
       <div ref={countRef} className="text-7xl tracking-tighter">
         0
       </div>
