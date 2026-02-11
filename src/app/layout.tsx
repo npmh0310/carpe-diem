@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Anton, Oswald } from "next/font/google"; // Anton as Druk alternative, Oswald for captions
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { InitialLoaderProvider } from "@/components/providers/initial-loader-provider";
 import { ModeToggle } from "@/components/common/ModeToggle";
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${anton.variable} ${oswald.variable} antialiased`}>
         <SmoothScrollProvider>
+          <TooltipProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -45,6 +47,7 @@ export default function RootLayout({
               </div>
             </InitialLoaderProvider>
           </ThemeProvider>
+        </TooltipProvider>
         </SmoothScrollProvider>
       </body>
     </html>

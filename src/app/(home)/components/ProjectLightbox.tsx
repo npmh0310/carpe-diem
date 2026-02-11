@@ -3,6 +3,11 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/data/projects";
 
@@ -158,9 +163,20 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   {/* <h2 className="text-base sm:text-lg md:text-xl font-light tracking-[0.18em] uppercase">
                     {project.title}
                   </h2> */}
-                  <p className="max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90">
-                    {project.description}
-                  </p>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90 line-clamp-3 cursor-default">
+                        {project.description}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      hideArrow
+                      className="max-w-sm px-3 py-2 text-[10px] font-light leading-relaxed tracking-[0.06em] text-background/95 text-left whitespace-pre-wrap"
+                    >
+                      {project.description}
+                    </TooltipContent>
+                  </Tooltip>
                   <div className="mt-1 text-[8px] sm:text-[9px] uppercase tracking-[0.22em] opacity-60">
                     Photographer · {project.photographer}
                   </div>

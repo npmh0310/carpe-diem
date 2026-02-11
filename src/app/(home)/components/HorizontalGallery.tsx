@@ -2,7 +2,7 @@
 
 import type { RefObject } from "react";
 import { motion, type MotionValue, useTransform } from "framer-motion";
-import { PROJECTS } from "@/data/projects";
+import type { Project } from "@/data/projects";
 import type { LightboxProject } from "./ProjectLightbox";
 import { ProjectSlice } from "./ProjectSlice";
 
@@ -11,6 +11,7 @@ interface HorizontalGalleryProps {
   progress: MotionValue<number>;
   activeIndex?: number | null;
   onOpenProject?: (project: LightboxProject) => void;
+  projects: Project[];
 }
 
 export const HorizontalGallery = ({
@@ -18,12 +19,10 @@ export const HorizontalGallery = ({
   progress,
   activeIndex = null,
   onOpenProject,
+  projects,
 }: HorizontalGalleryProps) => {
-  // Map vertical scroll (0 to 1) to horizontal translation
   const x = useTransform(progress, [0, 1], ["0%", "-75%"]);
-
-  // Tổng số project duy nhất – đồng bộ với HeaderProjectTrack
-  const totalItems = PROJECTS.length;
+  const totalItems = projects.length;
 
   return (
     <div ref={targetRef} className="relative h-[300vh] bg-background">
@@ -34,7 +33,7 @@ export const HorizontalGallery = ({
           className="will-change-transform"
         >
           <motion.div style={{ x }} className="flex gap-4 pl-[calc(50vw-7vh)] md:pl-[calc(50vw-9vh)]">
-            {PROJECTS.map((project, index) => {
+            {projects.map((project, index) => {
               const isActive = activeIndex === index;
               const hasActive = activeIndex != null;
 

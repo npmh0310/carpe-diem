@@ -8,14 +8,18 @@ import {
   useVelocity,
   type MotionValue,
 } from "framer-motion";
-import { PROJECTS } from "@/data/projects";
+import type { Project } from "@/data/projects";
 
 interface HeaderProjectTrackProps {
   progress: MotionValue<number>;
+  projects: Project[];
 }
 
-export const HeaderProjectTrack = ({ progress }: HeaderProjectTrackProps) => {
-  const projectsCount = PROJECTS.length;
+export const HeaderProjectTrack = ({
+  progress,
+  projects,
+}: HeaderProjectTrackProps) => {
+  const projectsCount = projects.length;
 
   const indices = useMemo(
     () => Array.from({ length: projectsCount }, (_, i) => i),

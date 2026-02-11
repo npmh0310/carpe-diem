@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { PROJECTS } from "@/data/projects";
+import { getProjectBySlug } from "@/lib/projects";
 import { Logo } from "@/components/common/Logo";
 import { MaskText } from "@/components/common/MaskText";
 import { ImageGallery } from "./components/ImageGallery";
@@ -15,7 +15,7 @@ type ProjectSlugPageProps = {
 
 export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) {
   const { slug } = await params;
-  const project = PROJECTS.find((p) => p.slug === slug);
+  const project = await getProjectBySlug(slug);
 
   if (!project) {
     return (
@@ -101,9 +101,9 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
             </div>
 
             {/* Meta 2 cột: trái (máy/film/lab), phải (địa điểm/người chụp) */}
-            <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0">
+            {/* <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0"> */}
               {/* Cột trái: Dates, Camera, Film, Lab */}
-              <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
+              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
                 {leftMeta.map(({ label, value }) => (
                   <Fragment key={label}>
                     <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">
@@ -114,10 +114,10 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
                     </dd>
                   </Fragment>
                 ))}
-              </dl>
+              </dl> */}
 
               {/* Cột phải: Location, Photographer */}
-              <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em] md:mt-0 mt-6">
+              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em] md:mt-0 mt-6">
                 {rightMeta.map(({ label, value }) => (
                   <Fragment key={label}>
                     <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">
@@ -128,8 +128,8 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
                     </dd>
                   </Fragment>
                 ))}
-              </dl>
-            </div>
+              </dl> */}
+            {/* </div> */}
           </div>
         </section>
 
