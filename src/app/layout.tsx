@@ -20,15 +20,22 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "carpe-diem",
-  description: "carpe-diem",
+  metadataBase: new URL("https://carpe-diem-archive.vercel.app"),
+  title: "Carpe Diem",
+  description: "Film Photography Archive",
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
     title: "Carpe Diem",
-    description: "Carpe Diem",
-    url: "https://carpediem.com",
+    description: "Film Photography Archive",
+    url: "/",
+    siteName: "Carpe Diem",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Carpe Diem",
+    description: "Film Photography Archive",
   },
 };
 

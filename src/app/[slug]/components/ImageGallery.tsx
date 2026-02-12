@@ -15,8 +15,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
     return null;
   }
 
-  const GROUP_SIZE = 3;
-  const groupDelay = 0.23;
+  const staggerDelay = 0.18;
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const activeSrc = useMemo(() => (activeIndex === null ? null : images[activeIndex] ?? null), [activeIndex, images]);
@@ -48,10 +47,12 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
               style={{ willChange: "transform, opacity" }}
               initial={{ opacity: 0, y: 14, scale: 0.992 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.99 }}
               transition={{
-                duration: 0.55,
+                duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
-                delay: Math.floor(index / GROUP_SIZE) * groupDelay,
+                delay: index * staggerDelay,
               }}
               role="button"
               tabIndex={0}

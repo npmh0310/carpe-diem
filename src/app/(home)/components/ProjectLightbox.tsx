@@ -71,7 +71,7 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
         >
           {/* Panel – slide up from bottom */}
           <motion.div
-            className="relative z-10 flex h-full w-full items-center justify-center px-4 sm:px-10"
+            className="relative z-10 flex h-full w-full flex-col items-center justify-center px-4 sm:px-10"
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
@@ -104,12 +104,12 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
               </AnimatePresence>
             </div>
 
-            {/* Nội dung absolute dưới đáy, giống footer, cùng bề rộng với ảnh */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-6 sm:bottom-10 flex justify-center">
-              <div className="pointer-events-auto w-full max-w-3xl flex items-start justify-between gap-8 text-[10px] sm:text-[11px] font-oswald tracking-[0.2em]">
+            {/* Nội dung dưới ảnh, cùng bề rộng với ảnh */}
+            <div className="pointer-events-none mt-3 sm:mt-5 flex w-full justify-center">
+              <div className="pointer-events-auto w-full max-w-3xl flex flex-col sm:flex-row items-start justify-between gap-8 text-[10px] sm:text-[11px] font-oswald tracking-[0.2em]">
                 {/* Cột meta bên trái với A/B/C/D – map thẳng từ data */}
                 <motion.div
-                  className="flex flex-col gap-1 text-[9px] sm:text-[10px] uppercase"
+                  className="flex w-full items-center md:items-start flex-col gap-1 text-[9px] sm:text-[10px] uppercase"
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.42 }}
@@ -151,7 +151,7 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
 
                 {/* Cột phải: title + mô tả + nút view detail */}
                 <motion.div
-                  className="flex-1 flex flex-col items-end gap-2 text-right text-[9px] sm:text-[10px]"
+                  className="flex w-full items-center md:items-end flex-col gap-2 text-right text-[9px] sm:text-[10px]"
                   initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.52 }}
