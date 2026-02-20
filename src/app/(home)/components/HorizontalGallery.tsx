@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import type { RefObject } from "react";
 import { motion, type MotionValue, useTransform } from "framer-motion";
 import type { Project } from "@/data/projects";
@@ -9,6 +9,7 @@ import { ProjectSlice } from "./ProjectSlice";
 
 /** Số px swipe ngang ≈ 1 đơn vị scroll (viewport height) */
 const SWIPE_TO_SCROLL_RATIO = 1.2;
+const SWIPE_DECISION_THRESHOLD = 6;
 
 interface HorizontalGalleryProps {
   targetRef: RefObject<HTMLDivElement | null>;
@@ -27,54 +28,102 @@ export const HorizontalGallery = ({
 }: HorizontalGalleryProps) => {
   const x = useTransform(progress, [1, 0], ["-75%", "0%"]);
   const totalItems = projects.length;
-  const touchStart = useRef<{ x: number; y: number; scrollY: number } | null>(null);
+  const touchStart = useRef<{
+    x: number;
+    y: number;
+    scrollY: number;
+    minScroll: number;
+    maxScroll: number;
+  } | null>(null);
   const isHorizontalSwipe = useRef<boolean | null>(null);
+  const pendingScrollY = useRef<number | null>(null);
+  const rafId = useRef<number | null>(null);
+
+  const flushScroll = useCallback(() => {
+    if (pendingScrollY.current == null) return;
+    window.scrollTo(0, pendingScrollY.current);
+    pendingScrollY.current = null;
+  }, []);
+
+  const queueScroll = useCallback(
+    (scrollY: number) => {
+      pendingScrollY.current = scrollY;
+      if (rafId.current != null) return;
+
+      rafId.current = window.requestAnimationFrame(() => {
+        rafId.current = null;
+        flushScroll();
+      });
+    },
+    [flushScroll]
+  );
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
       if (activeIndex != null) return;
+      const target = targetRef.current;
+      if (!target) return;
+
+      const scrollRange = target.offsetHeight - window.innerHeight;
+      const minScroll = target.offsetTop;
+      const maxScroll = target.offsetTop + Math.max(0, scrollRange);
+
       touchStart.current = {
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
         scrollY: window.scrollY,
+        minScroll,
+        maxScroll,
       };
       isHorizontalSwipe.current = null;
     },
-    [activeIndex]
+    [activeIndex, targetRef]
   );
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       if (!touchStart.current || activeIndex != null) return;
-      const target = targetRef.current;
-      if (!target) return;
-
       const currentX = e.touches[0].clientX;
       const currentY = e.touches[0].clientY;
       const deltaX = currentX - touchStart.current.x;
       const deltaY = currentY - touchStart.current.y;
 
       if (isHorizontalSwipe.current === null) {
-        isHorizontalSwipe.current = Math.abs(deltaX) > Math.abs(deltaY);
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        if (absX < SWIPE_DECISION_THRESHOLD && absY < SWIPE_DECISION_THRESHOLD) {
+          return;
+        }
+        isHorizontalSwipe.current = absX > absY;
       }
       if (!isHorizontalSwipe.current) return;
 
       e.preventDefault();
-      const scrollRange = target.offsetHeight - window.innerHeight;
-      if (scrollRange <= 0) return;
       const deltaScroll = -deltaX * SWIPE_TO_SCROLL_RATIO;
       let newScrollY = touchStart.current.scrollY + deltaScroll;
-      const minScroll = target.offsetTop;
-      const maxScroll = target.offsetTop + scrollRange;
+      const { minScroll, maxScroll } = touchStart.current;
       newScrollY = Math.max(minScroll, Math.min(maxScroll, newScrollY));
-      window.scrollTo({ top: newScrollY, behavior: "auto" });
+      queueScroll(newScrollY);
     },
-    [activeIndex, targetRef]
+    [activeIndex, queueScroll]
   );
 
   const handleTouchEnd = useCallback(() => {
     touchStart.current = null;
     isHorizontalSwipe.current = null;
+    if (rafId.current != null) {
+      window.cancelAnimationFrame(rafId.current);
+      rafId.current = null;
+    }
+    flushScroll();
+  }, [flushScroll]);
+
+  useEffect(() => {
+    return () => {
+      if (rafId.current != null) {
+        window.cancelAnimationFrame(rafId.current);
+      }
+    };
   }, []);
 
   return (

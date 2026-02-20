@@ -23,6 +23,11 @@ interface ProjectLightboxProps {
 export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLightboxProps) {
   const router = useRouter();
 
+  // Prefetch the slug page as soon as the lightbox opens so navigation is instant
+  useEffect(() => {
+    if (project) router.prefetch(`/${project.slug}`);
+  }, [project, router]);
+
   useEffect(() => {
     if (!project) return;
 

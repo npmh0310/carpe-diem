@@ -5,7 +5,6 @@ import { useScroll, useSpring } from "framer-motion";
 import { Logo } from "@/components/common/Logo";
 import { SocialLinks } from "./SocialLinks";
 import { HorizontalGallery } from "./HorizontalGallery";
-import { HeaderProjectTrack } from "./HeaderProjectTrack";
 import { MaskText } from "@/components/common/MaskText";
 import Link from "next/link";
 import {
@@ -69,9 +68,6 @@ export function HomeContent({ projects }: HomeContentProps) {
           >
             <MaskText>About</MaskText>
           </Link>
-        </div>
-        <div className="pointer-events-none absolute inset-x-0 flex justify-center">
-          <HeaderProjectTrack progress={smoothProgress} projects={projects} />
         </div>
       </header>
 

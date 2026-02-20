@@ -1,11 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
-import { getProjectBySlug } from "@/lib/projects";
+import { getProjectBySlug, getProjects } from "@/lib/projects";
 import { Logo } from "@/components/common/Logo";
 import { MaskText } from "@/components/common/MaskText";
 import { ImageGallery } from "./components/ImageGallery";
 import { PageEnter } from "./components/PageEnter";
+
+export async function generateStaticParams() {
+  const projects = await getProjects();
+  return projects.map((p) => ({ slug: p.slug }));
+}
 
 type ProjectSlugPageProps = {
   params: Promise<{
