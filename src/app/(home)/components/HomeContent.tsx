@@ -12,12 +12,6 @@ import {
   type LightboxProject,
 } from "./ProjectLightbox";
 import type { Project } from "@/data/projects";
-import { useProjectsSync } from "@/lib/use-projects-sync";
-import {
-  mapDbRowToProject,
-  PROJECT_HOME_SELECT,
-  type ProjectDbRow,
-} from "@/lib/projects-shared";
 
 interface HomeContentProps {
   projects: Project[];
@@ -28,11 +22,6 @@ export function HomeContent({ projects }: HomeContentProps) {
   const [activeProject, setActiveProject] = useState<LightboxProject | null>(
     null
   );
-  const { items: displayProjects, error } = useProjectsSync<ProjectDbRow, Project>({
-    initialItems: projects,
-    select: PROJECT_HOME_SELECT,
-    mapRow: mapDbRowToProject,
-  });
 
   const { scrollYProgress } = useScroll({
     target: galleryRef,
@@ -47,32 +36,27 @@ export function HomeContent({ projects }: HomeContentProps) {
 
   const handleNextProject = () => {
     setActiveProject((current: LightboxProject | null) => {
-      if (!current || displayProjects.length === 0) return current;
+      if (!current) return current;
       const currentIndex = current.index;
-      const nextIndex = (currentIndex + 1) % displayProjects.length;
-      const nextProject = displayProjects[nextIndex];
+      const nextIndex = (currentIndex + 1) % projects.length;
+      const nextProject = projects[nextIndex];
       return { ...nextProject, index: nextIndex };
     });
   };
 
   const handlePrevProject = () => {
     setActiveProject((current: LightboxProject | null) => {
-      if (!current || displayProjects.length === 0) return current;
+      if (!current) return current;
       const currentIndex = current.index;
       const prevIndex =
-        (currentIndex - 1 + displayProjects.length) % displayProjects.length;
-      const prevProject = displayProjects[prevIndex];
+        (currentIndex - 1 + projects.length) % projects.length;
+      const prevProject = projects[prevIndex];
       return { ...prevProject, index: prevIndex };
     });
   };
 
   return (
     <main className="relative min-h-screen flex flex-col justify-between">
-      {error && (
-        <p className="fixed top-20 left-1/2 -translate-x-1/2 z-30 rounded-md bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
-          Không thể đồng bộ project mới: {error}
-        </p>
-      )}
       <header className="fixed top-0 left-0 w-full z-20 flex items-center justify-between p-4 sm:p-8 pointer-events-none mix-blend-difference text-white">
         <div className="pointer-events-auto">
           <Logo className="text-3xl" />
@@ -93,7 +77,7 @@ export function HomeContent({ projects }: HomeContentProps) {
           progress={smoothProgress}
           activeIndex={activeProject?.index ?? null}
           onOpenProject={setActiveProject}
-          projects={displayProjects}
+          projects={projects}
         />
       </div>
 
