@@ -63,7 +63,6 @@ export function useProjectsSync<TRow, TItem>({
 
   useEffect(() => {
     let alive = true;
-    const client = supabase;
 
     const wrappedRefresh = async () => {
       if (!alive) return;
@@ -72,7 +71,7 @@ export function useProjectsSync<TRow, TItem>({
 
     void wrappedRefresh();
 
-    if (!client) {
+    if (!supabase) {
       return () => {
         alive = false;
       };
@@ -90,7 +89,7 @@ export function useProjectsSync<TRow, TItem>({
     }
 
     const channel = realtime
-      ? client
+      ? supabase
           .channel(`projects-sync-${Math.random().toString(36).slice(2)}`)
           .on(
             "postgres_changes",
@@ -108,7 +107,7 @@ export function useProjectsSync<TRow, TItem>({
         window.removeEventListener("focus", wrappedRefresh);
         document.removeEventListener("visibilitychange", onVisible);
       }
-      if (channel) client.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [realtime, refresh, syncOnFocus]);
 
