@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useLayoutEffect, useState } from "react";
 import type { RefObject } from "react";
 import { motion, type MotionValue, useTransform } from "framer-motion";
 import type { Project } from "@/data/projects";
@@ -26,7 +26,9 @@ export const HorizontalGallery = ({
   onOpenProject,
   projects,
 }: HorizontalGalleryProps) => {
-  const x = useTransform(progress, [1, 0], ["-75%", "0%"]);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [maxShiftPx, setMaxShiftPx] = useState(0);
+  const x = useTransform(progress, [1, 0], [-maxShiftPx, 0]);
   const totalItems = projects.length;
   const touchStart = useRef<{
     x: number;
@@ -126,6 +128,26 @@ export const HorizontalGallery = ({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    const updateShift = () => {
+      const el = trackRef.current;
+      if (!el) return;
+      const max = Math.max(0, el.scrollWidth - window.innerWidth);
+      setMaxShiftPx(max);
+    };
+
+    updateShift();
+
+    const observer = new ResizeObserver(() => updateShift());
+    if (trackRef.current) observer.observe(trackRef.current);
+    window.addEventListener("resize", updateShift);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateShift);
+    };
+  }, [projects]);
+
   return (
     <div ref={targetRef} className="relative h-[200vh] bg-background md:h-[300vh]">
       <div
@@ -141,7 +163,11 @@ export const HorizontalGallery = ({
           aria-hidden={activeIndex != null}
           className="will-change-transform"
         >
-          <motion.div style={{ x }} className="flex gap-4 pl-[calc(50vw-7vh)] md:pl-[calc(50vw-9vh)]">
+          <motion.div
+            ref={trackRef}
+            style={{ x }}
+            className="flex gap-4 pl-[calc(50vw-7vh)] md:pl-[calc(50vw-9vh)]"
+          >
             {projects.map((project, index) => {
               const isActive = activeIndex === index;
               const hasActive = activeIndex != null;
