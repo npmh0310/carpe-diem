@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getOptimizedImageUrl } from "@/lib/image";
 import { ImageLightbox } from "./ImageLightbox";
 
 interface ImageGalleryProps {
@@ -11,52 +12,94 @@ interface ImageGalleryProps {
 }
 
 export function ImageGallery({ images, alt }: ImageGalleryProps) {
-  if (!images || images.length === 0) {
-    return null;
-  }
+  const galleryImages = useMemo(() => images ?? [], [images]);
+  const gridImages = useMemo(
+    () => galleryImages.map((src) => getOptimizedImageUrl(src, "grid")),
+    [galleryImages]
+  );
+  const lightboxImages = useMemo(
+    () => galleryImages.map((src) => getOptimizedImageUrl(src, "lightbox")),
+    [galleryImages]
+  );
+  const hasImages = galleryImages.length > 0;
 
-  const staggerDelay = 0.18;
+  const baseDelay = 0.03;
+  const maxAnimatedItems = 10;
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const activeSrc = useMemo(() => (activeIndex === null ? null : images[activeIndex] ?? null), [activeIndex, images]);
+  const activeSrc = useMemo(
+    () => (activeIndex === null ? null : lightboxImages[activeIndex] ?? null),
+    [activeIndex, lightboxImages]
+  );
+  const nextSrc = useMemo(() => {
+    if (activeIndex === null || lightboxImages.length === 0) return null;
+    return lightboxImages[(activeIndex + 1) % lightboxImages.length] ?? null;
+  }, [activeIndex, lightboxImages]);
+  const prevSrc = useMemo(() => {
+    if (activeIndex === null || lightboxImages.length === 0) return null;
+    return (
+      lightboxImages[(activeIndex - 1 + lightboxImages.length) % lightboxImages.length] ?? null
+    );
+  }, [activeIndex, lightboxImages]);
   const isOpen = activeIndex !== null && activeSrc !== null;
 
   const close = useCallback(() => setActiveIndex(null), []);
   const goNext = useCallback(() => {
     setActiveIndex((current) => {
       if (current === null) return current;
-      return (current + 1) % images.length;
+      return (current + 1) % galleryImages.length;
     });
-  }, [images.length]);
+  }, [galleryImages.length]);
   const goPrev = useCallback(() => {
     setActiveIndex((current) => {
       if (current === null) return current;
-      return (current - 1 + images.length) % images.length;
+      return (current - 1 + galleryImages.length) % galleryImages.length;
     });
-  }, [images.length]);
+  }, [galleryImages.length]);
+
+  useEffect(() => {
+    if (activeIndex === null || lightboxImages.length <= 1) return;
+
+    const prefetchOffsets = [1, -1];
+    prefetchOffsets.forEach((offset) => {
+      const targetIndex =
+        (activeIndex + offset + lightboxImages.length) % lightboxImages.length;
+      const prefetchSrc = lightboxImages[targetIndex];
+      if (!prefetchSrc) return;
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = prefetchSrc;
+    });
+  }, [activeIndex, lightboxImages]);
+
+  if (!hasImages) return null;
 
   return (
     <section className="">
       <div className="px-12 sm:px-16 md:px-20 pt-8 sm:pt-12 pb-0 sm:pb-0">
         {/* Masonry-style: 1/2/3 cột, ảnh bám sát nhau, không gap dọc lớn */}
         <div className="columns-1 sm:columns-2 md:columns-3 gap-2 sm:gap-3 md:gap-4">
-          {images.map((src, index) => (
+          {gridImages.map((src, index) => (
             <motion.div
               key={index}
               className="relative mb-2 sm:mb-3 md:mb-4 overflow-hidden group cursor-pointer break-inside-avoid-column"
-              style={{ willChange: "transform, opacity" }}
+              style={{
+                willChange: "transform, opacity",
+                contentVisibility: "auto",
+                containIntrinsicSize: "600px 800px",
+              }}
               initial={{ opacity: 0, y: 14, scale: 0.992 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.99 }}
               transition={{
-                duration: 0.7,
+                duration: 0.45,
                 ease: [0.22, 1, 0.36, 1],
-                delay: index * staggerDelay,
+                delay: Math.min(index, maxAnimatedItems) * baseDelay,
               }}
               role="button"
               tabIndex={0}
-              aria-label={`Open image ${index + 1} of ${images.length}`}
+              aria-label={`Open image ${index + 1} of ${galleryImages.length}`}
               onClick={() => setActiveIndex(index)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -73,7 +116,9 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                 height={1600}
                 className="w-full h-auto object-cover"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-                loading={index < 6 ? "eager" : "lazy"}
+                loading={index < 2 ? "eager" : "lazy"}
+                quality={75}
+                decoding="async"
               />
             </motion.div>
           ))}
@@ -85,7 +130,9 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
         src={activeSrc}
         alt={alt}
         index={activeIndex}
-        total={images.length}
+        total={galleryImages.length}
+        nextSrc={nextSrc}
+        prevSrc={prevSrc}
         onClose={close}
         onNext={goNext}
         onPrev={goPrev}

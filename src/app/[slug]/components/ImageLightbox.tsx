@@ -12,12 +12,25 @@ interface ImageLightboxProps {
   alt: string;
   index: number | null;
   total: number;
+  nextSrc?: string | null;
+  prevSrc?: string | null;
   onClose: () => void;
   onNext: () => void;
   onPrev: () => void;
 }
 
-export function ImageLightbox({ isOpen, src, alt, index, total, onClose, onNext, onPrev }: ImageLightboxProps) {
+export function ImageLightbox({
+  isOpen,
+  src,
+  alt,
+  index,
+  total,
+  nextSrc,
+  prevSrc,
+  onClose,
+  onNext,
+  onPrev,
+}: ImageLightboxProps) {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -86,30 +99,58 @@ export function ImageLightbox({ isOpen, src, alt, index, total, onClose, onNext,
             </Button>
 
             <div className="relative w-[min(88vw,980px)] h-[min(82vh,820px)] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 <motion.div
                   key={src}
                   className="absolute inset-0"
                   initial={{ opacity: 0, scale: 0.995 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.995 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <Image
                     src={src}
                     alt={`${alt} - Image ${(index ?? 0) + 1} of ${total}`}
                     fill
-                    sizes="100vw"
+                    sizes="(max-width: 640px) 88vw, 980px"
                     className="object-contain"
                     priority
+                    decoding="async"
+                    quality={75}
                   />
                 </motion.div>
               </AnimatePresence>
             </div>
+
+            {nextSrc && (
+              <Image
+                src={nextSrc}
+                alt=""
+                width={1600}
+                height={2200}
+                className="absolute size-px opacity-0 pointer-events-none"
+                loading="eager"
+                quality={75}
+                decoding="async"
+                aria-hidden
+              />
+            )}
+            {prevSrc && (
+              <Image
+                src={prevSrc}
+                alt=""
+                width={1600}
+                height={2200}
+                className="absolute size-px opacity-0 pointer-events-none"
+                loading="eager"
+                quality={75}
+                decoding="async"
+                aria-hidden
+              />
+            )}
           </div>
         </motion.div>
       ) : null}
     </AnimatePresence>
   );
 }
-

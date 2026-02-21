@@ -42,7 +42,11 @@ export async function getProjects(): Promise<Project[]> {
     .from("projects")
     .select("*")
     .order("created_at", { ascending: false });
-  if (error || !data?.length) return STATIC_PROJECTS;
+  if (error) {
+    console.error("[getProjects] Failed to fetch from Supabase:", error.message);
+    return [];
+  }
+  if (!data?.length) return [];
   return data.map((row) => dbToProject(row as DbProject));
 }
 
