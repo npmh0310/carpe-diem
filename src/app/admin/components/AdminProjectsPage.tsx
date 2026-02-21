@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -12,49 +12,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowRight, Trash2 } from "lucide-react";
-
-interface AdminProject {
-  id: string;
-  slug: string;
-  title: string;
-  src: string;
-  start_date: string;
-  end_date: string;
-}
+import {
+  mapDbRowToAdminProject,
+  PROJECT_ADMIN_SELECT,
+  type AdminProjectSummary,
+  type ProjectDbRow,
+} from "@/lib/projects-shared";
+import { useProjectsSync } from "@/lib/use-projects-sync";
 
 export function AdminProjectsPage() {
-  const [projects, setProjects] = useState<AdminProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    items: projects,
+    setItems: setProjects,
+    loading,
+    error,
+    refresh,
+  } = useProjectsSync<ProjectDbRow, AdminProjectSummary>({
+    initialItems: [],
+    select: PROJECT_ADMIN_SELECT,
+    mapRow: mapDbRowToAdminProject,
+    missingClientMessage: "Cần cấu hình Supabase (.env.local) để sử dụng trang admin.",
+  });
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!supabase) {
-      setError(
-        "Cần cấu hình Supabase (.env.local) để sử dụng trang admin."
-      );
-      setLoading(false);
-      return;
-    }
-
-    const fetchProjects = async () => {
-      setLoading(true);
-      setError(null);
-      const { data, error } = await supabase!
-        .from("projects")
-        .select("id, slug, title, src, start_date, end_date")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setProjects((data ?? []) as AdminProject[]);
-      }
-      setLoading(false);
-    };
-
-    fetchProjects();
-  }, []);
 
   const handleDelete = async (projectId: string) => {
     if (!supabase) return;
@@ -62,14 +41,14 @@ export function AdminProjectsPage() {
     if (!confirmed) return;
 
     setDeletingId(projectId);
-    setError(null);
 
     const { error } = await supabase.from("projects").delete().eq("id", projectId);
 
     if (error) {
-      setError(error.message);
+      window.alert(error.message);
     } else {
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      void refresh();
     }
 
     setDeletingId(null);
@@ -147,4 +126,3 @@ export function AdminProjectsPage() {
     </div>
   );
 }
-
