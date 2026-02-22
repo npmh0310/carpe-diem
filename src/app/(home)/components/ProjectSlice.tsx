@@ -3,6 +3,7 @@
 import { motion, MotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
 import Image from "next/image";
 import { MaskText } from "@/components/common/MaskText";
+import { getImageVariantUrls } from "@/lib/image-variants";
 import type { Project } from "@/data/projects";
 
 interface ProjectSliceProps {
@@ -15,6 +16,7 @@ interface ProjectSliceProps {
 
 export const ProjectSlice = ({ project, index, total, progress, onOpen }: ProjectSliceProps) => {
   const { src, title, location, startDate, endDate, filmName } = project;
+  const { thumbUrl } = getImageVariantUrls(src);
   // Parallax effect: map global progress to local image movement
   const parallaxX = useTransform(progress, [0, 1], ["0%", "-20%"]);
 
@@ -99,7 +101,7 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
           transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
         >
           <Image
-            src={src}
+            src={thumbUrl}
             alt={title}
             fill
             className="object-cover transition-all duration-500"

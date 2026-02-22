@@ -17,6 +17,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ImageIcon, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import imageCompression from "browser-image-compression";
 
 const BUCKET = "project-images";
 
@@ -35,6 +36,67 @@ function sanitizeFileName(name: string): string {
   const base = name.slice(0, name.length - ext.length);
   const safe = base.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
   return (safe || "image") + ext;
+}
+
+/** Resize/compress ảnh trước upload. Ảnh nhỏ không upscale. File không phải image trả về nguyên bản. */
+async function resizeImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) {
+    return file;
+  }
+  try {
+    const compressed = await imageCompression(file, {
+      maxWidthOrHeight: 1600,
+      initialQuality: 0.8,
+      maxSizeMB: 5,
+      useWebWorker: true,
+    });
+    return compressed;
+  } catch (err) {
+    throw new Error(
+      err instanceof Error ? err.message : "Không thể xử lý ảnh. Vui lòng thử file khác."
+    );
+  }
+}
+
+type ImageVariants = { thumb: File; medium: File; full: File };
+
+/** Tạo 3 version thumb / medium / full. Fallback file gốc nếu một variant lỗi. */
+async function generateImageVariants(file: File): Promise<ImageVariants> {
+  if (!file.type.startsWith("image/")) {
+    return { thumb: file, medium: file, full: file };
+  }
+  const opts = {
+    useWebWorker: true as const,
+  };
+  const thumb = imageCompression(file, {
+    ...opts,
+    maxWidthOrHeight: 800,
+    initialQuality: 0.8,
+    maxSizeMB: 2,
+  }).catch(() => {
+    console.warn("generateImageVariants: thumb fallback to original");
+    return file;
+  });
+  const medium = imageCompression(file, {
+    ...opts,
+    maxWidthOrHeight: 1600,
+    initialQuality: 0.85,
+    maxSizeMB: 6,
+  }).catch(() => {
+    console.warn("generateImageVariants: medium fallback to original");
+    return file;
+  });
+  const full = imageCompression(file, {
+    ...opts,
+    maxWidthOrHeight: 1600,
+    initialQuality: 0.9,
+    maxSizeMB: 8,
+  }).catch(() => {
+    console.warn("generateImageVariants: full fallback to original");
+    return file;
+  });
+  const [t, m, f] = await Promise.all([thumb, medium, full]);
+  return { thumb: t, medium: m, full: f };
 }
 
 function FormField({
@@ -119,6 +181,20 @@ export default function UploadPage() {
     return urlData.publicUrl;
   };
 
+  /** Upload 3 variant lên Storage, trả về public URL của medium (để lưu DB). */
+  const uploadImageVariants = async (
+    variants: ImageVariants,
+    projectId: string,
+    namePart: string
+  ): Promise<string> => {
+    const [, mediumUrl] = await Promise.all([
+      uploadFile(variants.thumb, `${projectId}/thumb_${namePart}`),
+      uploadFile(variants.medium, `${projectId}/medium_${namePart}`),
+      uploadFile(variants.full, `${projectId}/full_${namePart}`),
+    ]);
+    return mediumUrl;
+  };
+
   if (!supabase) {
     return (
       <div className="min-h-screen p-8 max-w-2xl mx-auto">
@@ -151,16 +227,26 @@ export default function UploadPage() {
         throw new Error("Chọn ảnh cover");
       }
       const projectId = crypto.randomUUID();
-      const coverPath = `${projectId}/cover_${sanitizeFileName(coverFile.name)}`;
-      const src = await uploadFile(coverFile, coverPath);
+      const coverVariants = await generateImageVariants(coverFile);
+      const coverNamePart = `cover_${sanitizeFileName(coverFile.name)}`;
+      const src = await uploadImageVariants(
+        coverVariants,
+        projectId,
+        coverNamePart
+      );
 
-      const imageUrls: string[] = [];
-      for (let i = 0; i < galleryFiles.length; i++) {
-        const f = galleryFiles[i];
-        const path = `${projectId}/gallery_${i}_${sanitizeFileName(f.name)}`;
-        const url = await uploadFile(f, path);
-        imageUrls.push(url);
-      }
+      const galleryVariants = await Promise.all(
+        galleryFiles.map((f) => generateImageVariants(f))
+      );
+      const imageUrls = await Promise.all(
+        galleryVariants.map((v, i) =>
+          uploadImageVariants(
+            v,
+            projectId,
+            `${i}_${sanitizeFileName(galleryFiles[i].name)}`
+          )
+        )
+      );
 
       const { error } = await supabase!.from("projects").insert({
         slug: form.slug || slugify(form.title),
