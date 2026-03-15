@@ -290,6 +290,36 @@ export default function UploadPage() {
     });
   };
 
+  const swapGallery = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setGalleryFiles((prev) => {
+      const next = [...prev];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= next.length ||
+        toIndex >= next.length
+      ) {
+        return prev;
+      }
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
+      return next;
+    });
+    setGalleryTransforms((prev) => {
+      const next = [...prev];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= next.length ||
+        toIndex >= next.length
+      ) {
+        return prev;
+      }
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
+      return next;
+    });
+  };
+
   const openPreview = () => {
     setPreviewOpen(true);
   };
@@ -727,6 +757,7 @@ export default function UploadPage() {
             onTransformChange={updateGalleryTransform}
             onRotate={rotateGalleryItem}
             onReorder={reorderGallery}
+            onSwap={swapGallery}
           />
 
           {error && (

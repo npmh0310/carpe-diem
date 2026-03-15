@@ -53,20 +53,24 @@ export interface GalleryPreviewModalProps {
   ) => void;
   onRotate: (index: number, delta: 90 | -90) => void;
   onReorder: (fromIndex: number, toIndex: number) => void;
+  onSwap: (fromIndex: number, toIndex: number) => void;
 }
 
 function SortableGalleryItem({
   id,
   url,
   index,
+  total,
   transform,
   onRotate,
   onTransformChange,
   transforms,
+  onSwap,
 }: {
   id: number;
   url: string;
   index: number;
+  total: number;
   transform: GalleryItemTransform;
   onRotate: (index: number, delta: 90 | -90) => void;
   onTransformChange: (
@@ -74,6 +78,7 @@ function SortableGalleryItem({
     patch: Partial<GalleryItemTransform>
   ) => void;
   transforms: GalleryItemTransform[];
+  onSwap: (fromIndex: number, toIndex: number) => void;
 }) {
   const {
     attributes,
@@ -103,9 +108,40 @@ function SortableGalleryItem({
         {...attributes}
         {...listeners}
       >
-        <span className="text-xs font-medium text-muted-foreground">
-          {index + 1}
-        </span>
+        <div className="relative">
+          <button
+            type="button"
+            className="text-xs font-medium text-muted-foreground underline underline-offset-2"
+            onClick={(e) => {
+              const select = e.currentTarget
+                .nextElementSibling as HTMLSelectElement | null;
+              if (select) {
+                select.focus();
+                if (typeof select.showPicker === "function") {
+                  select.showPicker();
+                }
+              }
+            }}
+          >
+            #{index + 1}
+          </button>
+          <select
+            className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+            value={index + 1}
+            onChange={(e) => {
+              const target = Number(e.target.value) - 1;
+              if (Number.isNaN(target) || target === index) return;
+              if (target < 0 || target >= total) return;
+              onSwap(index, target);
+            }}
+          >
+            {Array.from({ length: total }).map((_, i) => (
+              <option key={i} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
+          </select>
+        </div>
         <GripVertical
           className="size-4 text-muted-foreground shrink-0"
           aria-hidden
@@ -184,6 +220,7 @@ export function GalleryPreviewModal({
   onTransformChange,
   onRotate,
   onReorder,
+  onSwap,
 }: GalleryPreviewModalProps) {
   const itemIds = previewUrls.map((_, i) => i);
 
@@ -271,10 +308,12 @@ export function GalleryPreviewModal({
                       id={i}
                       url={url}
                       index={i}
+                      total={previewUrls.length}
                       transform={transforms[i] ?? DEFAULT_GALLERY_TRANSFORM}
                       onRotate={onRotate}
                       onTransformChange={onTransformChange}
                       transforms={transforms}
+                      onSwap={onSwap}
                     />
                   ))}
                 </div>
