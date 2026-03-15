@@ -15,9 +15,15 @@ import {
 } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ImageIcon, Trash2 } from "lucide-react";
+import { ArrowLeft, ImageIcon, Trash2, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import imageCompression from "browser-image-compression";
+import {
+  type GalleryItemTransform,
+  DEFAULT_GALLERY_TRANSFORM,
+  getGalleryTransformStyle,
+} from "@/lib/gallery-transform";
+import { GalleryPreviewModal } from "./components/GalleryPreviewModal";
 
 const BUCKET = "project-images";
 
@@ -99,6 +105,61 @@ async function generateImageVariants(file: File): Promise<ImageVariants> {
   return { thumb: t, medium: m, full: f };
 }
 
+/** Áp dụng xoay/lật lên ảnh, trả về File mới (dùng canvas). */
+async function applyImageTransform(
+  file: File,
+  t: GalleryItemTransform
+): Promise<File> {
+  if (
+    t.rotation === 0 &&
+    !t.flipH &&
+    !t.flipV
+  ) {
+    return file;
+  }
+  if (!file.type.startsWith("image/")) return file;
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const outW = t.rotation === 90 || t.rotation === 270 ? h : w;
+      const outH = t.rotation === 90 || t.rotation === 270 ? w : h;
+      const canvas = document.createElement("canvas");
+      canvas.width = outW;
+      canvas.height = outH;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      ctx.translate(outW / 2, outH / 2);
+      ctx.rotate((t.rotation * Math.PI) / 180);
+      ctx.scale(t.flipH ? -1 : 1, t.flipV ? -1 : 1);
+      ctx.translate(-w / 2, -h / 2);
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          resolve(new File([blob], file.name, { type: file.type }));
+        },
+        file.type,
+        0.92
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
+  });
+}
+
 function FormField({
   label,
   required,
@@ -142,6 +203,11 @@ export default function UploadPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [galleryTransforms, setGalleryTransforms] = useState<
+    GalleryItemTransform[]
+  >([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (coverFile) {
@@ -162,12 +228,70 @@ export default function UploadPage() {
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [galleryFiles]);
 
+  // Giữ galleryTransforms cùng độ dài với galleryFiles (thêm default khi thêm ảnh).
+  useEffect(() => {
+    setGalleryTransforms((prev) => {
+      const len = galleryFiles.length;
+      if (prev.length === len) return prev;
+      if (prev.length < len) {
+        return [
+          ...prev,
+          ...Array(len - prev.length)
+            .fill(null)
+            .map(() => ({ ...DEFAULT_GALLERY_TRANSFORM })),
+        ];
+      }
+      return prev.slice(0, len);
+    });
+  }, [galleryFiles.length]);
+
   const handleTitleChange = (v: string) => {
     setForm((f) => ({ ...f, title: v, slug: slugify(v) }));
   };
 
   const removeGalleryFile = (index: number) => {
     setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
+    setGalleryTransforms((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateGalleryTransform = (
+    index: number,
+    patch: Partial<GalleryItemTransform>
+  ) => {
+    setGalleryTransforms((prev) =>
+      prev.map((t, i) => (i === index ? { ...t, ...patch } : t))
+    );
+  };
+
+  const rotateGalleryItem = (index: number, delta: 90 | -90) => {
+    setGalleryTransforms((prev) =>
+      prev.map((t, i) => {
+        if (i !== index) return t;
+        const next =
+          (t.rotation + delta + 360) % 360;
+        return { ...t, rotation: next as 0 | 90 | 180 | 270 };
+      })
+    );
+  };
+
+  const reorderGallery = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setGalleryFiles((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      return next;
+    });
+    setGalleryTransforms((prev) => {
+      const next = [...prev];
+      const [removed] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, removed);
+      return next;
+    });
+  };
+
+  const openPreview = () => {
+    setPreviewOpen(true);
   };
 
   const uploadFile = async (file: File, path: string): Promise<string> => {
@@ -235,15 +359,20 @@ export default function UploadPage() {
         coverNamePart
       );
 
+      const galleryWithTransforms = await Promise.all(
+        galleryFiles.map((f, i) =>
+          applyImageTransform(f, galleryTransforms[i] ?? DEFAULT_GALLERY_TRANSFORM)
+        )
+      );
       const galleryVariants = await Promise.all(
-        galleryFiles.map((f) => generateImageVariants(f))
+        galleryWithTransforms.map((f) => generateImageVariants(f))
       );
       const imageUrls = await Promise.all(
         galleryVariants.map((v, i) =>
           uploadImageVariants(
             v,
             projectId,
-            `${i}_${sanitizeFileName(galleryFiles[i].name)}`
+            `${i}_${sanitizeFileName(galleryWithTransforms[i].name)}`
           )
         )
       );
@@ -460,41 +589,93 @@ export default function UploadPage() {
           <Card>
             <CardHeader>
               <CardTitle>Ảnh gallery</CardTitle>
-              <CardDescription>Nhiều ảnh – xem trước bên dưới</CardDescription>
+              <CardDescription>
+                Nhiều ảnh – click ảnh để xoay/lật, kéo thả sắp xếp, hoặc xem trước layout
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {galleryPreviews.length > 0 ? (
-                <div
-                  data-lenis-prevent
-                  className="overflow-x-auto overflow-y-hidden pb-2 -mx-1 scroll-smooth snap-x snap-mandatory w-full max-w-full overscroll-x-contain"
-                >
-                  <div className="flex gap-3 min-w-max px-1">
-                    {galleryPreviews.map((url, i) => (
-                      <div
-                        key={i}
-                        className="relative shrink-0 size-24 sm:size-32 rounded-lg overflow-hidden border bg-muted group snap-center"
-                      >
-                        <img
-                          src={url}
-                          alt={`Gallery ${i + 1}`}
-                          className="object-cover w-full h-full"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 size-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => removeGalleryFile(i)}
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-                        <span className="absolute bottom-1 left-1 text-[10px] font-medium text-white drop-shadow-md bg-black/50 px-1.5 py-0.5 rounded">
-                          {i + 1}
-                        </span>
-                      </div>
-                    ))}
+                <>
+                  <div
+                    data-lenis-prevent
+                    className="overflow-x-auto overflow-y-hidden pb-2 -mx-1 scroll-smooth snap-x snap-mandatory w-full max-w-full overscroll-x-contain"
+                  >
+                    <div className="flex gap-3 min-w-max px-1">
+                      {galleryPreviews.map((url, i) => {
+                        const transform = galleryTransforms[i] ?? DEFAULT_GALLERY_TRANSFORM;
+                        return (
+                          <div
+                            key={i}
+                            draggable
+                            onDragStart={(e) => {
+                              setDraggedIndex(i);
+                              e.dataTransfer.setData("text/plain", String(i));
+                              e.dataTransfer.effectAllowed = "move";
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                            }}
+                            onDragEnd={() => setDraggedIndex(null)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const from = draggedIndex ?? parseInt(e.dataTransfer.getData("text/plain"), 10);
+                              if (Number.isNaN(from)) return;
+                              reorderGallery(from, i);
+                              setDraggedIndex(null);
+                            }}
+                            className={cn(
+                              "relative shrink-0 size-24 sm:size-32 rounded-lg overflow-hidden border bg-muted group snap-center cursor-grab active:cursor-grabbing",
+                              draggedIndex === i && "opacity-60 ring-2 ring-primary"
+                            )}
+                          >
+                            <button
+                              type="button"
+                              className="absolute inset-0 w-full h-full block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg z-0"
+                              onClick={() => openPreview()}
+                              aria-label={`Xem và sửa ảnh ${i + 1}`}
+                            >
+                              <img
+                                src={url}
+                                alt={`Gallery ${i + 1}`}
+                                className="object-cover w-full h-full transition-transform duration-200"
+                                style={{
+                                  transform: getGalleryTransformStyle(transform),
+                                  transformOrigin: "center center",
+                                }}
+                              />
+                            </button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 size-6 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeGalleryFile(i);
+                              }}
+                            >
+                              <Trash2 className="size-3" />
+                            </Button>
+                            <span className="absolute bottom-1 left-1 text-[10px] font-medium text-white drop-shadow-md bg-black/50 px-1.5 py-0.5 rounded z-10">
+                              {i + 1}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openPreview()}
+                    className="gap-2"
+                  >
+                    <Eye className="size-4" />
+                    Xem trước layout
+                  </Button>
+                </>
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <ImageIcon className="size-8 text-muted-foreground mb-2" />
@@ -537,6 +718,16 @@ export default function UploadPage() {
               </div>
             </CardContent>
           </Card>
+
+          <GalleryPreviewModal
+            open={previewOpen}
+            onOpenChange={setPreviewOpen}
+            previewUrls={galleryPreviews}
+            transforms={galleryTransforms}
+            onTransformChange={updateGalleryTransform}
+            onRotate={rotateGalleryItem}
+            onReorder={reorderGallery}
+          />
 
           {error && (
             <p className="text-sm text-destructive bg-destructive/10 px-4 py-2 rounded-md">
