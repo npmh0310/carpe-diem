@@ -114,14 +114,14 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
       <div className="absolute inset-x-0  bottom-0 h-28 bg-linear-to-t from-black/70 via-black/25 to-transparent" />
 
       {/* Content Overlay */}
-      <div className="absolute bottom-4 left-4 z-10 text-white mix-blend-difference pr-1">
-        <div className="text-[10px] uppercase tracking-[0.22em] opacity-80 mb-1">
+      <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 z-10 text-white mix-blend-difference pr-1">
+        <div className="text-[8px] md:text-[10px] uppercase tracking-[0.22em] opacity-80 mb-0.5 md:mb-1">
           {location} · {yearLabel}
         </div>
-        <div className="font-anton text-2xl leading-none uppercase tracking-tight max-w-[11vw] wrap-break-word">
+        <div className="font-anton text-sm md:text-2xl leading-none uppercase tracking-tight max-w-[80px] md:max-w-[11vw] wrap-break-word">
           <MaskText>{title}</MaskText>
         </div>
-        <div className="mt-1 text-[10px] uppercase tracking-[0.18em] opacity-80">
+        <div className="mt-0.5 md:mt-1 text-[8px] md:text-[10px] uppercase tracking-[0.18em] opacity-80">
           {filmName}
         </div>
       </div>
