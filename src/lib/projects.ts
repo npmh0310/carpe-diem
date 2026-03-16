@@ -1,11 +1,13 @@
 import type { Project } from "@/data/projects";
 import { PROJECTS as STATIC_PROJECTS } from "@/data/projects";
+import { createImageVariantSetFromSingleUrl } from "@/lib/image-variants";
 import { supabase } from "./supabase";
 
 type DbProject = {
   slug: string;
   title: string;
   src: string;
+  display_order?: number | null;
   start_date: string;
   end_date: string;
   film_name: string;
@@ -23,6 +25,7 @@ function dbToProject(row: DbProject): Project {
     slug: row.slug,
     title: row.title,
     src: row.src,
+    cover: createImageVariantSetFromSingleUrl(row.src),
     startDate: row.start_date,
     endDate: row.end_date,
     filmName: row.film_name,
@@ -32,7 +35,7 @@ function dbToProject(row: DbProject): Project {
     lab: row.lab,
     framesCount: row.frames_count ?? undefined,
     description: row.description,
-    images: row.images ?? undefined,
+    images: row.images?.map(createImageVariantSetFromSingleUrl) ?? undefined,
   };
 }
 
@@ -41,6 +44,7 @@ export async function getProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
+    .order("display_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
   if (error || !data?.length) return STATIC_PROJECTS;
   return data.map((row) => dbToProject(row as DbProject));

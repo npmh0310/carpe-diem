@@ -410,10 +410,23 @@ export default function UploadPage() {
         )
       );
 
+      const { data: lastOrderRow } = await supabase!
+        .from("projects")
+        .select("display_order")
+        .order("display_order", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextOrder =
+        typeof lastOrderRow?.display_order === "number"
+          ? lastOrderRow.display_order + 1
+          : 0;
+
       const { error } = await supabase!.from("projects").insert({
         slug: form.slug || slugify(form.title),
         title: form.title,
         src,
+        display_order: nextOrder,
         start_date: form.startDate,
         end_date: form.endDate,
         film_name: form.filmName,

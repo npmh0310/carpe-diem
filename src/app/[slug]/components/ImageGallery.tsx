@@ -4,9 +4,10 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useCallback, useMemo, useState } from "react";
 import { ImageLightbox } from "./ImageLightbox";
+import type { ImageVariantSet } from "@/lib/image-variants";
 
 interface ImageGalleryProps {
-  images: string[];
+  images: ImageVariantSet[];
   alt: string;
 }
 
@@ -22,16 +23,16 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
   }
 
   const columns = useMemo(() => {
-    const cols: { index: number; src: string }[][] = [[], [], []];
-    images.forEach((src, index) => {
-      cols[index % 3].push({ index, src });
+    const cols: { index: number; image: ImageVariantSet }[][] = [[], [], []];
+    images.forEach((image, index) => {
+      cols[index % 3].push({ index, image });
     });
     return cols;
   }, [images]);
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const activeSrc = useMemo(
-    () => (activeIndex === null ? null : images[activeIndex] ?? null),
+    () => (activeIndex === null ? null : images[activeIndex]?.full.url ?? null),
     [activeIndex, images]
   );
   const isOpen = activeIndex !== null && activeSrc !== null;
@@ -56,7 +57,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
         <div className="grid grid-cols-3 gap-3 items-start">
           {columns.map((col, colIndex) => (
             <div key={colIndex} className="flex flex-col gap-3">
-              {col.map(({ index, src }) => (
+              {col.map(({ index, image }) => (
                 <motion.div
                   key={index}
                   className="relative overflow-hidden group cursor-pointer"
@@ -82,7 +83,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
                 >
                   <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
                   <Image
-                    src={src}
+                    src={image.medium.url}
                     alt={`${alt} - Image ${index + 1}`}
                     width={1200}
                     height={1600}

@@ -145,7 +145,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
           <section className="bg-black">
             <div className="relative w-full aspect-4/3 sm:aspect-video overflow-hidden">
               <Image
-                src={project.src}
+                src={project.cover.medium.url}
                 alt={project.title}
                 fill
                 className="object-cover"
