@@ -118,7 +118,7 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
         <div className="text-[10px] uppercase tracking-[0.22em] opacity-80 mb-1">
           {location} · {yearLabel}
         </div>
-        <div className="text-2xl leading-none font-light uppercase tracking-tight max-w-[11vw] wrap-break-word">
+        <div className="font-anton text-2xl leading-none uppercase tracking-tight max-w-[11vw] wrap-break-word">
           <MaskText>{title}</MaskText>
         </div>
         <div className="mt-1 text-[10px] uppercase tracking-[0.18em] opacity-80">

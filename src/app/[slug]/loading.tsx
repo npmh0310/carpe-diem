@@ -10,7 +10,7 @@ export default function Loading() {
         <Link href="/" className="pointer-events-auto">
           <Logo className="text-3xl" />
         </Link>
-        <div className="flex items-center gap-6 text-[10px] sm:text-xs font-oswald uppercase tracking-[0.28em]">
+        <div className="flex items-center gap-6 text-[10px] sm:text-xs font-anton uppercase tracking-[0.28em]">
           <Link href="/" className="hover:opacity-70 transition-opacity">
             <MaskText>Back to gallery</MaskText>
           </Link>

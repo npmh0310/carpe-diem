@@ -67,7 +67,7 @@ export const GlobalLoading = ({ onComplete }: GlobalLoadingProps) => {
         height={40}
         className="absolute top-10 left-1/2 -translate-x-1/2 invert dark:invert-0"
       />
-      <div ref={countRef} className="text-7xl tracking-tighter">
+      <div ref={countRef} className="text-7xl font-anton tracking-tighter">
         0
       </div>
     </div>

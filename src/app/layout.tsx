@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Anton, Oswald } from "next/font/google"; // Anton as Druk alternative, Oswald for captions
+import { Anton, Oswald, Inter } from "next/font/google"; // Anton as Druk alternative, Oswald for captions, Inter for body text
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,22 +19,28 @@ const oswald = Oswald({
   weight: ["400"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "500"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://carpe-diem-archive.vercel.app"),
-  title: "Carpe Diem",
+  title: "carpe-diem",
   description: "Film Photography Archive",
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "Carpe Diem",
+    title: "carpe-diem",
     description: "Film Photography Archive",
     url: "/",
-    siteName: "Carpe Diem",
+    siteName: "carpe-diem",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Carpe Diem",
+    title: "carpe-diem",
     description: "Film Photography Archive",
   },
 };
@@ -46,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${anton.variable} ${oswald.variable} antialiased`}>
+      <body className={`${anton.variable} ${oswald.variable} ${inter.variable} antialiased`}>
         <SmoothScrollProvider>
           <TooltipProvider>
           <ThemeProvider

@@ -69,8 +69,8 @@ export function ImageLightbox({ isOpen, src, alt, index, total, onClose, onNext,
               variant="secondary"
               size="icon"
               aria-label="Previous image"
-              onClick={onPrev}
-              className="absolute  left-3 sm:left-4 rounded-full z-20"
+              onClick={(e) => { e.stopPropagation(); onPrev(); }}
+              className="absolute left-3 sm:left-4 rounded-full z-20"
             >
               <ChevronLeft />
             </Button>
@@ -79,7 +79,7 @@ export function ImageLightbox({ isOpen, src, alt, index, total, onClose, onNext,
               variant="secondary"
               size="icon"
               aria-label="Next image"
-              onClick={onNext}
+              onClick={(e) => { e.stopPropagation(); onNext(); }}
               className="absolute right-3 sm:right-4 rounded-full z-20"
             >
               <ChevronRight />

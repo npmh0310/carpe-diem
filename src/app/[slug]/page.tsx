@@ -25,7 +25,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
   if (!project) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
-        <p className="font-oswald text-xs uppercase tracking-[0.3em] opacity-60">
+        <p className=" text-xs uppercase tracking-[0.3em] opacity-60">
           Project not found
         </p>
         <p className="mt-2 text-[11px] text-muted-foreground/80">
@@ -33,9 +33,9 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] uppercase tracking-[0.26em] hover:opacity-70 transition-opacity"
+          className="mt-6 inline-flex items-center gap-2 border-b border-current pb-0.5 text-[10px] font-anton uppercase tracking-[0.26em] hover:opacity-70 transition-opacity"
         >
-          <span>Back to gallery</span>
+          <MaskText>Back to gallery</MaskText>
         </Link>
       </main>
     );
@@ -81,7 +81,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
         <Link href="/" className="pointer-events-auto">
           <Logo className="text-3xl" />
         </Link>
-        <div className="flex items-center gap-6 text-[10px] sm:text-xs font-oswald uppercase tracking-[0.28em]">
+        <div className="flex items-center gap-6 text-[10px] sm:text-xs font-anton uppercase tracking-[0.28em]">
           <Link href="/" className="hover:opacity-70 transition-opacity">
             <MaskText>Back to gallery</MaskText>
           </Link>
@@ -92,12 +92,12 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
         {/* Nội dung album: title + description nhỏ + meta 2 cột – nền sáng */}
         <section className="flex-1 px-4 sm:px-8 py-12 sm:py-16 md:py-20">
           <div className="mx-auto max-w-4xl">
-            <h1 className="text-center text-3xl sm:text-4xl md:text-5xl font-semibold uppercase tracking-[0.12em] text-foreground">
+            <h1 className="font-anton text-center text-3xl sm:text-4xl md:text-5xl uppercase tracking-[0.12em] text-foreground">
               {project.title}
             </h1>
 
-            {/* Description nhỏ dưới title – cùng font với meta (Oswald) */}
-            <div className="mt-6 sm:mt-8 text-center font-oswald text-[11px] sm:text-[12px] leading-relaxed text-foreground/80 max-w-2xl mx-auto normal-case tracking-[0.16em]">
+            {/* Description nhỏ dưới title */}
+            <div className="mt-6 sm:mt-8 text-center text-sm leading-relaxed text-foreground/75 max-w-2xl mx-auto font-light">
               {descriptionBlocks.map((block, i) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>
                   {block}
@@ -108,7 +108,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
             {/* Meta 2 cột: trái (máy/film/lab), phải (địa điểm/người chụp) */}
             {/* <div className="mt-12 sm:mt-16 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-0"> */}
               {/* Cột trái: Dates, Camera, Film, Lab */}
-              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
+              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0  text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
                 {leftMeta.map(({ label, value }) => (
                   <Fragment key={label}>
                     <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">
@@ -122,7 +122,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
               </dl> */}
 
               {/* Cột phải: Location, Photographer */}
-              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0 font-oswald text-[10px] sm:text-[11px] uppercase tracking-[0.2em] md:mt-0 mt-6">
+              {/* <dl className="grid grid-cols-[7rem_1fr] gap-x-6 gap-y-0  text-[10px] sm:text-[11px] uppercase tracking-[0.2em] md:mt-0 mt-6">
                 {rightMeta.map(({ label, value }) => (
                   <Fragment key={label}>
                     <dt className="pt-3 border-b border-foreground/10 pb-2 text-foreground/55">

@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 export const SocialLinks = () => {
   return (
-    <div className="flex flex-col items-end gap-1 text-xs uppercase tracking-widest">
+    <div className="flex flex-col items-end gap-1 text-xs uppercase font-anton tracking-widest">
       {SOCIAL_LINKS.map((link, index) => (
         <a
           key={link.label}
