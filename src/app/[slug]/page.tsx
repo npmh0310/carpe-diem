@@ -90,14 +90,14 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
 
       <PageEnter>
         {/* Nội dung album: title + description nhỏ + meta 2 cột – nền sáng */}
-        <section className="flex-1 px-4 sm:px-8 py-12 sm:py-16 md:py-20">
+        <section className="flex-1 px-6 sm:px-8 py-12 sm:py-16 md:py-20">
           <div className="mx-auto max-w-4xl">
             <h1 className="font-anton text-center text-3xl sm:text-4xl md:text-5xl uppercase tracking-[0.12em] text-foreground">
               {project.title}
             </h1>
 
             {/* Description nhỏ dưới title */}
-            <div className="mt-6 sm:mt-8 text-center text-sm leading-relaxed text-foreground/75 max-w-2xl mx-auto font-light">
+            <div className="mt-6 sm:mt-8 text-center text-[12px] sm:text-sm leading-relaxed text-foreground/75  max-w-2xl mx-auto font-light">
               {descriptionBlocks.map((block, i) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>
                   {block}
