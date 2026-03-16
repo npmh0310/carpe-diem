@@ -16,7 +16,7 @@ interface ProjectSliceProps {
 
 export const ProjectSlice = ({ project, index, total, progress, onOpen }: ProjectSliceProps) => {
   const { src, title, location, startDate, endDate, filmName } = project;
-  const { thumbUrl } = getImageVariantUrls(src);
+  const { thumbUrl } = getImageVariantUrls(src ?? "");
   // Parallax effect: map global progress to local image movement
   const parallaxX = useTransform(progress, [0, 1], ["0%", "-20%"]);
 
@@ -111,14 +111,14 @@ export const ProjectSlice = ({ project, index, total, progress, onOpen }: Projec
       </div>
 
       {/* Readability gradient */}
-      <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-black/70 via-black/25 to-transparent" />
+      <div className="absolute inset-x-0  bottom-0 h-28 bg-linear-to-t from-black/70 via-black/25 to-transparent" />
 
       {/* Content Overlay */}
-      <div className="absolute bottom-4 left-4 z-10 text-white mix-blend-difference">
+      <div className="absolute bottom-4 left-4 z-10 text-white mix-blend-difference pr-1">
         <div className="text-[10px] uppercase tracking-[0.22em] opacity-80 mb-1">
           {location} · {yearLabel}
         </div>
-        <div className="text-2xl font-light uppercase tracking-tight">
+        <div className="text-2xl leading-none font-light uppercase tracking-tight max-w-[11vw] wrap-break-word">
           <MaskText>{title}</MaskText>
         </div>
         <div className="mt-1 text-[10px] uppercase tracking-[0.18em] opacity-80">

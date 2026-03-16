@@ -83,7 +83,7 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
             transition={{ duration: 1, ease: [0.32, 0.72, 0, 1] }}
             onClick={onClose}
           >
-            {/* Ảnh ở đúng trung tâm màn hình */}
+            {/* Ảnh ở đúng trung tâm màn hình, giữ đủ tỷ lệ ảnh */}
             <div
               className="relative w-full max-w-3xl flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
@@ -95,13 +95,13 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.18 }}
-                  className="relative w-full aspect-video overflow-hidden"
+                  className="relative w-full h-[min(60vh,60vw)] overflow-hidden"
                 >
                   <Image
-                    src={project.src}
+                    src={project.src ?? ""}
                     alt={project.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes="100vw"
                     priority
                   />
@@ -170,15 +170,11 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   </h2> */}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90 line-clamp-3 cursor-default">
+                      <p className="relative max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90 line-clamp-3 cursor-default pr-3 ">
                         {project.description}
                       </p>
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      hideArrow
-                      className="max-w-sm px-3 py-2 text-[10px] font-light leading-relaxed tracking-[0.06em] text-background/95 text-left whitespace-pre-wrap"
-                    >
+                    <TooltipContent side="top" hideArrow>
                       {project.description}
                     </TooltipContent>
                   </Tooltip>

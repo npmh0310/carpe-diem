@@ -186,6 +186,7 @@ export default function UploadPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [improvingDescription, setImprovingDescription] = useState(false);
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -200,8 +201,10 @@ export default function UploadPage() {
     framesCount: 36,
   });
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverDragActive, setCoverDragActive] = useState(false);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryDragActive, setGalleryDragActive] = useState(false);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [galleryTransforms, setGalleryTransforms] = useState<
     GalleryItemTransform[]
@@ -286,6 +289,36 @@ export default function UploadPage() {
       const next = [...prev];
       const [removed] = next.splice(fromIndex, 1);
       next.splice(toIndex, 0, removed);
+      return next;
+    });
+  };
+
+  const swapGallery = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setGalleryFiles((prev) => {
+      const next = [...prev];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= next.length ||
+        toIndex >= next.length
+      ) {
+        return prev;
+      }
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
+      return next;
+    });
+    setGalleryTransforms((prev) => {
+      const next = [...prev];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= next.length ||
+        toIndex >= next.length
+      ) {
+        return prev;
+      }
+      [next[fromIndex], next[toIndex]] = [next[toIndex], next[fromIndex]];
       return next;
     });
   };
@@ -377,10 +410,23 @@ export default function UploadPage() {
         )
       );
 
+      const { data: lastOrderRow } = await supabase!
+        .from("projects")
+        .select("display_order")
+        .order("display_order", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextOrder =
+        typeof lastOrderRow?.display_order === "number"
+          ? lastOrderRow.display_order + 1
+          : 0;
+
       const { error } = await supabase!.from("projects").insert({
         slug: form.slug || slugify(form.title),
         title: form.title,
         src,
+        display_order: nextOrder,
         start_date: form.startDate,
         end_date: form.endDate,
         film_name: form.filmName,
@@ -400,6 +446,42 @@ export default function UploadPage() {
       setError(err instanceof Error ? err.message : "Lỗi không xác định");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImproveDescription = async () => {
+    if (!form.description.trim()) return;
+    setImprovingDescription(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/improve-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: form.description }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const message =
+          typeof data?.error === "string"
+            ? data.error
+            : "Không thể cải thiện mô tả. Vui lòng thử lại.";
+        throw new Error(message);
+      }
+      const data = await res.json();
+      if (!data || typeof data.text !== "string") {
+        throw new Error("Phản hồi không hợp lệ từ server.");
+      }
+      setForm((f) => ({ ...f, description: data.text }));
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Đã xảy ra lỗi khi cải thiện mô tả."
+      );
+    } finally {
+      setImprovingDescription(false);
     }
   };
 
@@ -442,16 +524,31 @@ export default function UploadPage() {
                 />
               </FormField>
               <FormField label="Description" required>
-                <textarea
-                  required
-                  rows={4}
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, description: e.target.value }))
-                  }
-                  placeholder="Mô tả project..."
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-                />
+                <div className="space-y-2">
+                  <textarea
+                    required
+                    rows={4}
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, description: e.target.value }))
+                    }
+                    placeholder="Mô tả project..."
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleImproveDescription}
+                      disabled={improvingDescription || !form.description.trim()}
+                    >
+                      {improvingDescription
+                        ? "Đang gợi ý mô tả..."
+                        : "Gợi ý mô tả hay hơn"}
+                    </Button>
+                  </div>
+                </div>
               </FormField>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Start date">
@@ -561,7 +658,31 @@ export default function UploadPage() {
                   </Button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                <label
+                  className={cn(
+                    "flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors",
+                    coverDragActive && "border-primary/60 bg-primary/5"
+                  )}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "copy";
+                    setCoverDragActive(true);
+                  }}
+                  onDragLeave={(e) => {
+                    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                    setCoverDragActive(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setCoverDragActive(false);
+                    const files = Array.from(e.dataTransfer.files ?? []).filter((f) =>
+                      f.type.startsWith("image/")
+                    );
+                    if (files[0]) {
+                      setCoverFile(files[0]);
+                    }
+                  }}
+                >
                   <ImageIcon className="size-10 text-muted-foreground mb-2" />
                   <span className="text-sm text-muted-foreground">
                     Click để chọn ảnh cover
@@ -677,7 +798,31 @@ export default function UploadPage() {
                   </Button>
                 </>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                <label
+                  className={cn(
+                    "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors",
+                    galleryDragActive && "border-primary/60 bg-primary/5"
+                  )}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "copy";
+                    setGalleryDragActive(true);
+                  }}
+                  onDragLeave={(e) => {
+                    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                    setGalleryDragActive(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setGalleryDragActive(false);
+                    const files = Array.from(e.dataTransfer.files ?? []).filter((f) =>
+                      f.type.startsWith("image/")
+                    );
+                    if (files.length) {
+                      setGalleryFiles((prev) => [...prev, ...files]);
+                    }
+                  }}
+                >
                   <ImageIcon className="size-8 text-muted-foreground mb-2" />
                   <span className="text-sm text-muted-foreground">
                     Click để chọn nhiều ảnh
@@ -727,6 +872,7 @@ export default function UploadPage() {
             onTransformChange={updateGalleryTransform}
             onRotate={rotateGalleryItem}
             onReorder={reorderGallery}
+            onSwap={swapGallery}
           />
 
           {error && (
