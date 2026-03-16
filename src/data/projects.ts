@@ -1,3 +1,5 @@
+import type { ImageVariantSet } from "@/lib/image-variants";
+
 export interface Project {
   /** Slug để dùng cho URL sau này */
   slug: string;
@@ -5,8 +7,11 @@ export interface Project {
   /** Tiêu đề hiển thị cho project */
   title: string;
 
-  /** Ảnh cover chính của cuộn */
-  src: string;
+  /** Legacy cover URL (medium). Prefer using `cover` variants. */
+  src?: string;
+
+  /** Ảnh cover chính của cuộn (đủ small/medium/full). */
+  cover: ImageVariantSet;
 
   /** Ngày bắt đầu chụp cuộn film – ISO string */
   startDate: string;
@@ -35,8 +40,8 @@ export interface Project {
   /** Mô tả chi tiết cho cuộn film / series */
   description: string;
 
-  /** Danh sách ảnh trong album (optional) */
-  images?: string[];
+  /** Danh sách ảnh trong album (optional, đủ small/medium/full) */
+  images?: ImageVariantSet[];
 }
 
 export const PROJECTS: Project[] = [
@@ -44,6 +49,17 @@ export const PROJECTS: Project[] = [
     slug: "maison-de-verre",
     title: "Maison de Verre",
     src: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2019-10-12",
     endDate: "2019-10-12",
     filmName: "Kodak Portra 400",
@@ -55,27 +71,122 @@ export const PROJECTS: Project[] = [
     description:
       "Soft afternoon light on glass and steel. A quiet study of reflections, depth and small domestic details.",
     images: [
-      "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1200&auto=format&fit=crop",
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
+      {
+        small: {
+          url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=800&auto=format&fit=crop",
+        },
+        medium: {
+          url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1600&auto=format&fit=crop",
+        },
+        full: {
+          url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=2400&auto=format&fit=crop",
+        },
+      },
     ],
   },
   {
     slug: "modern-loft",
     title: "Modern Loft",
     src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2020-02-18",
     endDate: "2020-02-18",
     filmName: "Fujifilm Pro 400H",
@@ -91,6 +202,17 @@ export const PROJECTS: Project[] = [
     slug: "urban-retreat",
     title: "Urban Retreat",
     src: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2021-05-03",
     endDate: "2021-05-03",
     filmName: "Kodak Ektar 100",
@@ -106,6 +228,17 @@ export const PROJECTS: Project[] = [
     slug: "coastal-villa",
     title: "Coastal Villa",
     src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2021-08-22",
     endDate: "2021-08-22",
     filmName: "Kodak Gold 200",
@@ -121,6 +254,17 @@ export const PROJECTS: Project[] = [
     slug: "minimal-studio",
     title: "Minimal Studio",
     src: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2022-01-14",
     endDate: "2022-01-14",
     filmName: "Ilford HP5 400",
@@ -136,6 +280,17 @@ export const PROJECTS: Project[] = [
     slug: "skyline-penthouse",
     title: "Skyline Penthouse",
     src: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1523217582562-09d0def993a6?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2022-06-09",
     endDate: "2022-06-09",
     filmName: "Cinestill 800T",
@@ -151,6 +306,17 @@ export const PROJECTS: Project[] = [
     slug: "concrete-residence",
     title: "Concrete Residence",
     src: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2020-11-28",
     endDate: "2020-11-28",
     filmName: "Kodak Tri-X 400",
@@ -166,6 +332,17 @@ export const PROJECTS: Project[] = [
     slug: "brutalist-tower",
     title: "Brutalist Tower",
     src: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2019-03-02",
     endDate: "2019-03-02",
     filmName: "Ilford FP4 125",
@@ -181,6 +358,17 @@ export const PROJECTS: Project[] = [
     slug: "forest-cabin",
     title: "Forest Cabin",
     src: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2021-10-01",
     endDate: "2021-10-01",
     filmName: "Kodak Portra 160",
@@ -196,6 +384,17 @@ export const PROJECTS: Project[] = [
     slug: "glass-pavilion",
     title: "Glass Pavilion",
     src: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2020-04-17",
     endDate: "2020-04-17",
     filmName: "Fujifilm Superia 400",
@@ -211,6 +410,17 @@ export const PROJECTS: Project[] = [
     slug: "mountain-chalet",
     title: "Mountain Chalet",
     src: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1586105251261-72a756497a11?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2022-12-05",
     endDate: "2022-12-05",
     filmName: "Kodak Portra 800",
@@ -226,6 +436,17 @@ export const PROJECTS: Project[] = [
     slug: "desert-house",
     title: "Desert House",
     src: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=2400&h=1600&auto=format&fit=crop",
+    cover: {
+      small: {
+        url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=800&h=533&auto=format&fit=crop",
+      },
+      medium: {
+        url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=1600&h=1067&auto=format&fit=crop",
+      },
+      full: {
+        url: "https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&w=2400&h=1600&auto=format&fit=crop",
+      },
+    },
     startDate: "2023-05-19",
     endDate: "2023-05-19",
     filmName: "Kodak Gold 200",

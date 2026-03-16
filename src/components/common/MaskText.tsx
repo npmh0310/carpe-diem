@@ -28,7 +28,7 @@ export const MaskText = ({
   };
 
   return (
-    <div className={`relative overflow-hidden inline-flex gap-1 ${className}`}>
+    <div className={`relative overflow-hidden inline-flex flex-wrap gap-1 ${className}`}>
       {words.map((word, index) => (
         <div key={index} className="relative overflow-hidden">
           <motion.span
