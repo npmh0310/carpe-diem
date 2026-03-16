@@ -40,7 +40,7 @@ export const Logo = ({ className, ...props }: LogoProps) => {
   return (
     <motion.div
       className={cn(
-        "uppercase tracking-tighter cursor-pointer select-none inline-flex",
+        "font-anton uppercase tracking-tighter cursor-pointer select-none inline-flex",
         className,
       )}
       onMouseEnter={handleMouseEnter}

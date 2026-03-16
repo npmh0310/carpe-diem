@@ -53,7 +53,7 @@ export function ImageGallery({ images, alt }: ImageGalleryProps) {
 
   return (
     <section className="">
-      <div className="px-12 sm:px-16 md:px-20 pt-8 sm:pt-12 pb-0 sm:pb-0">
+      <div className="px-6 sm:px-10 md:px-20 pt-8 sm:pt-12 pb-8 ">
         <div className="grid grid-cols-3 gap-3 items-start">
           {columns.map((col, colIndex) => (
             <div key={colIndex} className="flex flex-col gap-3">

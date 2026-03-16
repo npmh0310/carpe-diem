@@ -64,7 +64,7 @@ export function HomeContent({ projects }: HomeContentProps) {
         <div className="pointer-events-auto">
           <Link
             href="/about"
-            className="uppercase text-xs tracking-widest hover:opacity-60 transition-opacity"
+            className="uppercase text-xs font-anton tracking-widest hover:opacity-60 transition-opacity"
           >
             <MaskText>About</MaskText>
           </Link>

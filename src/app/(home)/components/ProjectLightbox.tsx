@@ -20,7 +20,12 @@ interface ProjectLightboxProps {
   onPrev?: () => void;
 }
 
-export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLightboxProps) {
+export function ProjectLightbox({
+  project,
+  onClose,
+  onNext,
+  onPrev,
+}: ProjectLightboxProps) {
   const router = useRouter();
 
   // Prefetch the slug page as soon as the lightbox opens so navigation is instant
@@ -94,7 +99,11 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.18 }}
+                  transition={{
+                    duration: 0.7,
+                    ease: [0.32, 0.72, 0, 1],
+                    delay: 0.18,
+                  }}
                   className="relative w-full h-[min(60vh,60vw)] overflow-hidden"
                 >
                   <Image
@@ -111,13 +120,17 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
 
             {/* Nội dung dưới ảnh, cùng bề rộng với ảnh */}
             <div className="pointer-events-none mt-3 sm:mt-5 flex w-full justify-center">
-              <div className="pointer-events-auto w-full max-w-3xl flex flex-col sm:flex-row items-start justify-between gap-8 text-[10px] sm:text-[11px] font-oswald tracking-[0.2em]">
+              <div className="pointer-events-auto w-full max-w-3xl flex flex-col sm:flex-row items-start justify-between gap-8 text-[10px] sm:text-[11px] tracking-[0.2em]">
                 {/* Cột meta bên trái với A/B/C/D – map thẳng từ data */}
                 <motion.div
                   className="flex w-full items-center md:items-start flex-col gap-1 text-[9px] sm:text-[10px] uppercase"
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.42 }}
+                  transition={{
+                    duration: 0.7,
+                    ease: [0.32, 0.72, 0, 1],
+                    delay: 0.42,
+                  }}
                 >
                   <div className="flex items-baseline gap-3 sm:gap-4">
                     <span className="opacity-60">A</span>
@@ -144,7 +157,9 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                     <span className="opacity-60">Film</span>
                     <span className="opacity-90">
                       {project.filmName}
-                      {project.framesCount ? ` · ${project.framesCount} frames` : ""}
+                      {project.framesCount
+                        ? ` · ${project.framesCount} frames`
+                        : ""}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-3 sm:gap-4">
@@ -159,7 +174,11 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   className="flex w-full items-center md:items-end flex-col gap-2 text-right text-[9px] sm:text-[10px]"
                   initial={{ x: 20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.52 }}
+                  transition={{
+                    duration: 0.7,
+                    ease: [0.32, 0.72, 0, 1],
+                    delay: 0.52,
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="uppercase opacity-70 tracking-[0.22em]">
@@ -170,11 +189,15 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                   </h2> */}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className="relative max-w-xs leading-relaxed tracking-[0.12em] text-muted-foreground/90 line-clamp-3 cursor-default pr-3 ">
+                      <p className="relative text-[11px] max-w-xs leading-relaxed tracking-normal font-light text-muted-foreground/90 line-clamp-3 cursor-default pr-3">
                         {project.description}
                       </p>
                     </TooltipTrigger>
-                    <TooltipContent side="top" hideArrow>
+                    <TooltipContent
+                      side="top"
+                      hideArrow
+                      className="text-[11px] font-light leading-relaxed tracking-normal"
+                    >
                       {project.description}
                     </TooltipContent>
                   </Tooltip>
@@ -189,14 +212,22 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
                     animate={{ y: 0, opacity: 1 }}
                     whileHover={{ x: 4, opacity: 0.8 }}
                     whileTap={{ scale: 0.96 }}
-                    transition={{ duration: 0.65, ease: [0.32, 0.72, 0, 1], delay: 0.65 }}
+                    transition={{
+                      duration: 0.65,
+                      ease: [0.32, 0.72, 0, 1],
+                      delay: 0.65,
+                    }}
                   >
                     <span>View detail album</span>
                     <motion.span
                       className="text-base leading-none"
                       initial={{ rotate: 0 }}
                       whileHover={{ rotate: 90 }}
-                      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20,
+                      }}
                     >
                       +
                     </motion.span>
@@ -210,4 +241,3 @@ export function ProjectLightbox({ project, onClose, onNext, onPrev }: ProjectLig
     </AnimatePresence>
   );
 }
-
