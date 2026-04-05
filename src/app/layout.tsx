@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { InitialLoaderProvider } from "@/components/providers/initial-loader-provider";
 import { ModeToggle } from "@/components/common/ModeToggle";
+import { getSiteUrl } from "@/lib/site-url";
 
 const anton = Anton({
   variable: "--font-anton",
@@ -26,7 +27,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://carpe-diem-archive.vercel.app"),
+  metadataBase: new URL(getSiteUrl()),
   title: "carpe-diem",
   description: "Film Photography Archive",
   icons: {
