@@ -1,22 +1,82 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
 import { getProjectBySlug, getProjects } from "@/lib/projects";
+import { getSiteUrl } from "@/lib/site-url";
 import { Logo } from "@/components/common/Logo";
 import { MaskText } from "@/components/common/MaskText";
 import { ImageGallery } from "./components/ImageGallery";
 import { PageEnter } from "./components/PageEnter";
-
-export async function generateStaticParams() {
-  const projects = await getProjects();
-  return projects.map((p) => ({ slug: p.slug }));
-}
 
 type ProjectSlugPageProps = {
   params: Promise<{
     slug: string;
   }>;
 };
+
+export async function generateMetadata({ params }: ProjectSlugPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+
+  if (!project) {
+    return { title: "Project Not Found" };
+  }
+
+  const siteUrl = getSiteUrl();
+  const url = `${siteUrl}/${slug}`;
+  const description = project.description.slice(0, 155);
+  const ogImage = project.cover.medium.url;
+  const dateRange = (() => {
+    const start = new Date(project.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    const end = new Date(project.endDate).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    return start === end ? start : `${start} – ${end}`;
+  })();
+
+  return {
+    title: project.title,
+    description,
+    keywords: [
+      project.title,
+      project.filmName,
+      project.camera,
+      project.location,
+      "film photography",
+      "analog",
+      "Nguyen Phuoc Minh Hieu",
+    ],
+    alternates: { canonical: url },
+    openGraph: {
+      title: project.title,
+      description,
+      url,
+      type: "article",
+      publishedTime: project.startDate,
+      modifiedTime: project.endDate,
+      authors: ["Nguyen Phuoc Minh Hieu"],
+      tags: [project.filmName, project.camera, project.location, "film photography"],
+      images: [
+        {
+          url: ogImage,
+          width: 1600,
+          height: 1067,
+          alt: `${project.title} — ${dateRange} — ${project.location}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
+export async function generateStaticParams() {
+  const projects = await getProjects();
+  return projects.map((p) => ({ slug: p.slug }));
+}
 
 export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) {
   const { slug } = await params;
@@ -62,19 +122,41 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
     ? `${project.filmName} · ${project.framesCount} frames`
     : project.filmName;
 
-  const leftMeta = [
-    { label: "Camera", value: project.camera },
-    { label: "Film", value: filmLabel },
-    { label: "Lab", value: project.lab },
-  ];
-
-  const rightMeta = [
-    { label: "Location", value: project.location },
-    { label: "Dates", value: dateRange },
-    { label: "Photographer", value: project.photographer },
-  ];
+  const siteUrl = getSiteUrl();
+  const pageUrl = `${siteUrl}/${project.slug}`;
+  const allImages = project.images ?? [project.cover];
+  const photoAlbumJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    name: project.title,
+    description: project.description,
+    url: pageUrl,
+    dateCreated: project.startDate,
+    dateModified: project.endDate,
+    locationCreated: {
+      "@type": "Place",
+      name: project.location,
+    },
+    author: {
+      "@type": "Person",
+      name: project.photographer,
+      url: siteUrl,
+    },
+    image: allImages.map((img) => ({
+      "@type": "ImageObject",
+      contentUrl: img.full.url,
+      thumbnailUrl: img.small.url,
+      description: `${project.title} — ${project.location}`,
+    })),
+    keywords: [project.filmName, project.camera, project.location, "film photography"].join(", "),
+  };
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(photoAlbumJsonLd) }}
+      />
     <main className="min-h-screen flex flex-col text-foreground  ">
       {/* Top bar */}
       <header className="flex items-center justify-between px-4 sm:px-8 pt-4 sm:pt-8 pb-6 sm:pb-10">
@@ -157,6 +239,7 @@ export default async function ProjectSlugPage({ params }: ProjectSlugPageProps) 
         )}
       </PageEnter>
     </main>
+    </>
   );
 }
 

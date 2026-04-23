@@ -28,22 +28,74 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: "carpe-diem",
-  description: "Film Photography Archive",
+  title: {
+    default: "Carpe Diem — Film Photography by Nguyen Phuoc Minh Hieu",
+    template: "%s | Carpe Diem",
+  },
+  description:
+    "A personal film photography archive by Nguyen Phuoc Minh Hieu. Shot on analog cameras across Vietnam and beyond — Kodak, Ilford, Fujifilm.",
+  keywords: [
+    "film photography",
+    "analog photography",
+    "35mm film",
+    "film archive",
+    "Nguyen Phuoc Minh Hieu",
+    "Vietnam photographer",
+    "Kodak Portra",
+    "Ilford HP5",
+    "carpe diem",
+  ],
+  authors: [{ name: "Nguyen Phuoc Minh Hieu", url: getSiteUrl() }],
+  creator: "Nguyen Phuoc Minh Hieu",
+  publisher: "Nguyen Phuoc Minh Hieu",
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "carpe-diem",
-    description: "Film Photography Archive",
-    url: "/",
-    siteName: "carpe-diem",
+    title: "Carpe Diem — Film Photography by Nguyen Phuoc Minh Hieu",
+    description:
+      "A personal film photography archive shot on analog cameras across Vietnam and beyond.",
+    url: getSiteUrl(),
+    siteName: "Carpe Diem",
+    type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "carpe-diem",
-    description: "Film Photography Archive",
+    title: "Carpe Diem — Film Photography",
+    description:
+      "A personal film photography archive shot on analog cameras across Vietnam and beyond.",
+    creator: "@carpe__diem.jpg",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: getSiteUrl(),
+  },
+};
+
+const siteUrl = getSiteUrl();
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Nguyen Phuoc Minh Hieu",
+  url: siteUrl,
+  sameAs: [
+    "https://www.instagram.com/carpe__diem.jpg",
+    "https://www.facebook.com/nguyen.phuoc.minh.hieu.2025",
+  ],
+  jobTitle: "Film Photographer",
+  description:
+    "Vietnamese film photographer documenting everyday life on analog cameras.",
 };
 
 export default function RootLayout({
@@ -53,6 +105,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+      </head>
       <body className={`${anton.variable} ${oswald.variable} ${inter.variable} antialiased`}>
         <SmoothScrollProvider>
           <TooltipProvider>
